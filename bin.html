@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Number System Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+h2 {
+  text-align: center;
+  opacity: 0.9;
+}
+
+select, input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+select, input {
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  background: #2f80ed;
+  color: white;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.clear {
+  background: #ff7675;
+  color: black;
+}
+
+.output, .explain {
+  margin-top: 14px;
+  background: #1e222b;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>Number System Calculator</h2>
+
+  <select id="base">
+    <option value="10">Decimal (DEC)</option>
+    <option value="2">Binary (BIN)</option>
+    <option value="8">Octal (OCT)</option>
+    <option value="16">Hexadecimal (HEX)</option>
+  </select>
+
+  <input id="number" placeholder="Enter number">
+
+  <button onclick="convert()">Convert</button>
+  <button class="clear" onclick="clearAll()">Clear</button>
+
+  <div id="result" class="output"></div>
+  <div id="steps" class="explain"></div>
+</div>
+
+<script>
+function convert() {
+  const numStr = document.getElementById("number").value.trim();
+  const base = Number(document.getElementById("base").value);
+
+  if (numStr === "") {
+    alert("Please enter a number");
+    return;
+  }
+
+  let decimal;
+  if (base === 10) {
+    decimal = Number(numStr);
+    if (isNaN(decimal)) {
+      alert("Invalid decimal number");
+      return;
+    }
+  } else {
+    decimal = parseInt(numStr, base);
+    if (isNaN(decimal)) {
+      alert("Invalid number for selected base");
+      return;
+    }
+  }
+
+  const bin = decimal.toString(2);
+  const oct = decimal.toString(8);
+  const hex = decimal.toString(16).toUpperCase();
+
+  document.getElementById("result").innerHTML = `
+    <b>Decimal:</b> ${decimal}<br>
+    <b>Binary:</b> ${bin}<br>
+    <b>Octal:</b> ${oct}<br>
+    <b>Hexadecimal:</b> ${hex}
+  `;
+
+  if (base === 10) {
+    document.getElementById("steps").innerHTML =
+      decimalSteps(decimal);
+  } else {
+    document.getElementById("steps").innerHTML =
+      otherBaseSteps(numStr, base);
+  }
+}
+
+function decimalSteps(num) {
+  let steps = `<b>Decimal to Binary (Division Method)</b><br><br>`;
+  let n = num;
+  let remainders = [];
+
+  while (n > 0) {
+    steps += `${n} ÷ 2 = ${Math.floor(n/2)} remainder ${n % 2}<br>`;
+    remainders.push(n % 2);
+    n = Math.floor(n / 2);
+  }
+
+  steps += `<br>Write remainders from bottom to top:<br>`;
+  steps += `<b>Binary = ${remainders.reverse().join("")}</b>`;
+
+  return steps;
+}
+
+function otherBaseSteps(num, base) {
+  let steps = `<b>Step-by-step to Decimal</b><br><br>`;
+  let power = num.length - 1;
+  let sum = 0;
+
+  for (let i = 0; i < num.length; i++) {
+    let digit = parseInt(num[i], base);
+    let value = digit * Math.pow(base, power);
+    steps += `${digit} × ${base}<sup>${power}</sup> = ${value}<br>`;
+    sum += value;
+    power--;
+  }
+
+  steps += `<br><b>Total = ${sum} (Decimal)</b>`;
+  return steps;
+}
+
+function clearAll() {
+  document.getElementById("number").value = "";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("steps").innerHTML = "";
+}
+</script>
+
+</body>
+</html>

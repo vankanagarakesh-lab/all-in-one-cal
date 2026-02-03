@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SGPA & CGPA Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:Arial;
+  color:white;
+}
+.app{
+  max-width:420px;
+  margin:auto;
+  padding:16px;
+}
+h2{
+  text-align:center;
+}
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+}
+input,select{
+  background:#1e222b;
+  color:white;
+}
+button{
+  background:#2f80ed;
+  color:white;
+}
+.card{
+  background:#1e222b;
+  padding:12px;
+  border-radius:8px;
+  margin-top:10px;
+}
+.result{
+  font-size:22px;
+  text-align:center;
+  margin-top:12px;
+}
+.explain{
+  font-size:14px;
+  line-height:1.6;
+  margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h2>🎓 SGPA & CGPA Calculator</h2>
+
+<select id="mode" onchange="switchMode()">
+  <option value="sgpa">SGPA Calculator</option>
+  <option value="cgpa">CGPA Calculator</option>
+</select>
+
+<!-- SGPA -->
+<div id="sgpaBox">
+  <input id="subjectCount" type="number" placeholder="Enter number of subjects">
+  <button onclick="createSubjects()">Create Subjects</button>
+
+  <div id="subjectInputs"></div>
+  <button onclick="calculateSGPA()">Calculate SGPA</button>
+</div>
+
+<!-- CGPA -->
+<div id="cgpaBox" style="display:none">
+  <input id="semesterCount" type="number" placeholder="Enter number of semesters">
+  <button onclick="createSemesters()">Create Semesters</button>
+
+  <div id="semesterInputs"></div>
+  <button onclick="calculateCGPA()">Calculate CGPA</button>
+</div>
+
+<div class="card">
+  <div id="result" class="result"></div>
+  <div id="explain" class="explain"></div>
+</div>
+
+</div>
+
+<script>
+function switchMode(){
+  sgpaBox.style.display = mode.value==="sgpa" ? "block" : "none";
+  cgpaBox.style.display = mode.value==="cgpa" ? "block" : "none";
+  result.innerHTML="";
+  explain.innerHTML="";
+}
+
+function createSubjects(){
+  let n = +subjectCount.value;
+  subjectInputs.innerHTML="";
+  if(n<=0) return;
+
+  for(let i=1;i<=n;i++){
+    subjectInputs.innerHTML += `
+      <div class="card">
+        <b>Subject ${i}</b>
+        <input id="c${i}" placeholder="Credits (eg: 3)">
+        <input id="g${i}" placeholder="Grade Point (10,9,8...)">
+      </div>`;
+  }
+}
+
+function calculateSGPA(){
+  let n = +subjectCount.value;
+  let total=0, credits=0;
+  let steps="";
+
+  for(let i=1;i<=n;i++){
+    let c = +document.getElementById("c"+i).value;
+    let g = +document.getElementById("g"+i).value;
+    total += c*g;
+    credits += c;
+    steps += `Subject ${i}: ${g} × ${c} = ${c*g}<br>`;
+  }
+
+  let sgpa = (total/credits).toFixed(2);
+  result.innerHTML = `SGPA = ${sgpa}`;
+  explain.innerHTML = `
+    <b>Step-by-step SGPA:</b><br>
+    ${steps}
+    Total = ${total}<br>
+    Total Credits = ${credits}<br>
+    SGPA = ${total} ÷ ${credits} = <b>${sgpa}</b>
+  `;
+}
+
+function createSemesters(){
+  let n = +semesterCount.value;
+  semesterInputs.innerHTML="";
+  if(n<=0) return;
+
+  for(let i=1;i<=n;i++){
+    semesterInputs.innerHTML += `
+      <input id="s${i}" placeholder="Semester ${i} SGPA">`;
+  }
+}
+
+function calculateCGPA(){
+  let n = +semesterCount.value;
+  let sum=0;
+  let steps="";
+
+  for(let i=1;i<=n;i++){
+    let v = +document.getElementById("s"+i).value;
+    sum += v;
+    steps += `Semester ${i} SGPA = ${v}<br>`;
+  }
+
+  let cgpa = (sum/n).toFixed(2);
+  result.innerHTML = `CGPA = ${cgpa}`;
+  explain.innerHTML = `
+    <b>Step-by-step CGPA:</b><br>
+    ${steps}
+    CGPA = ${sum} ÷ ${n} = <b>${cgpa}</b>
+  `;
+}
+</script>
+
+</body>
+</html>

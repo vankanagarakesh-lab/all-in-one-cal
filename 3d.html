@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>3D Graph Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f1115;
+  color:white;
+  text-align:center;
+}
+input, select, button{
+  padding:10px;
+  font-size:16px;
+  width:90%;
+  max-width:320px;
+  margin:6px;
+}
+#graph{
+  width:100%;
+  height:420px;
+}
+.info{
+  font-size:14px;
+  opacity:0.85;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🧊 3D Graph Calculator</h2>
+
+<div class="info">
+Enter formula for <b>z = f(x,y)</b><br>
+Example: <code>sin(x)*cos(y)</code>
+</div>
+
+<input id="formula" value="sin(x)*cos(y)">
+
+<select id="type">
+  <option value="surface">3D Surface</option>
+  <option value="scatter3d">3D Scatter</option>
+  <option value="mesh3d">3D Mesh</option>
+  <option value="line">3D Line</option>
+  <option value="contour">Contour (Top view)</option>
+</select>
+
+<button onclick="draw()">Draw Graph</button>
+
+<div id="graph"></div>
+
+<p class="info">
+🖱 Drag mouse → rotate  
+🔍 Scroll → zoom  
+</p>
+
+<script>
+function draw(){
+  let expr = document.getElementById("formula").value;
+  let type = document.getElementById("type").value;
+
+  let x = [], y = [], z = [];
+
+  for(let i=-5;i<=5;i+=0.5){
+    let row=[];
+    let rowy=[];
+    for(let j=-5;j<=5;j+=0.5){
+      try{
+        let val = Function("x","y",
+          "return " + expr
+            .replace(/sin/g,"Math.sin")
+            .replace(/cos/g,"Math.cos")
+            .replace(/tan/g,"Math.tan")
+            .replace(/sqrt/g,"Math.sqrt")
+        )(i,j);
+
+        row.push(val);
+        rowy.push(j);
+      }catch{
+        alert("Invalid formula");
+        return;
+      }
+    }
+    z.push(row);
+    x.push(rowy);
+    y.push(Array(row.length).fill(i));
+  }
+
+  let data;
+
+  if(type==="surface"){
+    data=[{z:z, type:"surface"}];
+  }
+  else if(type==="contour"){
+    data=[{z:z, type:"contour"}];
+  }
+  else if(type==="scatter3d"){
+    let xs=[],ys=[],zs=[];
+    for(let i=0;i<z.length;i++){
+      for(let j=0;j<z[i].length;j++){
+        xs.push(i);
+        ys.push(j);
+        zs.push(z[i][j]);
+      }
+    }
+    data=[{
+      x:xs,y:ys,z:zs,
+      mode:"markers",
+      type:"scatter3d"
+    }];
+  }
+  else if(type==="mesh3d"){
+    let xs=[],ys=[],zs=[];
+    for(let i=0;i<z.length;i++){
+      for(let j=0;j<z[i].length;j++){
+        xs.push(i);
+        ys.push(j);
+        zs.push(z[i][j]);
+      }
+    }
+    data=[{x:xs,y:ys,z:zs,type:"mesh3d"}];
+  }
+  else if(type==="line"){
+    let xs=[],ys=[],zs=[];
+    for(let i=0;i<z.length;i++){
+      xs.push(i);
+      ys.push(i);
+      zs.push(z[i][i]);
+    }
+    data=[{
+      x:xs,y:ys,z:zs,
+      type:"scatter3d",
+      mode:"lines"
+    }];
+  }
+
+  Plotly.newPlot("graph", data, {
+    paper_bgcolor:"#0f1115",
+    plot_bgcolor:"#0f1115",
+    font:{color:"white"},
+    scene:{
+      xaxis:{title:"X"},
+      yaxis:{title:"Y"},
+      zaxis:{title:"Z"}
+    }
+  });
+}
+draw();
+</script>
+
+</body>
+</html>

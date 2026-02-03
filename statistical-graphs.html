@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Statistical Graphs – Fixed</title>
+<style>
+body{
+  background:#0f1115;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+}
+input,select,button{
+  padding:8px;
+  font-size:16px;
+  margin:5px;
+}
+canvas{
+  background:white;
+  margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📊 Statistical Graphs (Working)</h2>
+
+<input id="data" style="width:80%"
+placeholder="10,20,30 | A=30,B=70">
+
+<br>
+
+<select id="type">
+  <option value="bar">Bar Graph</option>
+  <option value="double">Double Bar Graph</option>
+  <option value="line">Line Graph</option>
+  <option value="hist">Histogram</option>
+  <option value="poly">Frequency Polygon</option>
+  <option value="curve">Frequency Curve</option>
+  <option value="pie">Pie Chart</option>
+  <option value="ogive">Ogive</option>
+</select>
+
+<button onclick="draw()">Draw</button>
+
+<br>
+
+<canvas id="c" width="700" height="450"></canvas>
+
+<script>
+const c=document.getElementById("c");
+const ctx=c.getContext("2d");
+
+function clear(){
+  ctx.clearRect(0,0,c.width,c.height);
+}
+
+function axes(max){
+  ctx.strokeStyle="black";
+  ctx.beginPath();
+  ctx.moveTo(50,400); ctx.lineTo(650,400);
+  ctx.moveTo(50,400); ctx.lineTo(50,50);
+  ctx.stroke();
+
+  for(let i=0;i<=10;i++){
+    ctx.fillText((max*i/10).toFixed(0),10,400-i*35);
+    ctx.fillText(i,50+i*55,420);
+  }
+}
+
+function draw(){
+  clear();
+  let t=type.value;
+  let raw=data.value;
+
+  if(t==="pie"){ pie(raw); return; }
+  if(t==="double"){
+    let p=raw.split("|");
+    barDouble(p[0].split(",").map(Number),
+              p[1].split(",").map(Number));
+    return;
+  }
+
+  let a=raw.split(",").map(Number);
+  if(a.length<2) return;
+
+  if(t==="bar") bar(a);
+  if(t==="line") line(a);
+  if(t==="hist") hist(a);
+  if(t==="poly") polygon(a);
+  if(t==="curve") curve(a);
+  if(t==="ogive") ogive(a);
+}
+
+/* ----------- GRAPHS ------------ */
+
+function bar(a){
+  let m=Math.max(...a); axes(m);
+  ctx.fillStyle="green";
+  a.forEach((v,i)=>{
+    ctx.fillRect(60+i*55,400-(v/m)*300,30,(v/m)*300);
+  });
+}
+
+function barDouble(a,b){
+  let m=Math.max(...a,...b); axes(m);
+  a.forEach((v,i)=>{
+    ctx.fillStyle="blue";
+    ctx.fillRect(60+i*70,400-(v/m)*300,20,(v/m)*300);
+    ctx.fillStyle="red";
+    ctx.fillRect(85+i*70,400-(b[i]/m)*300,20,(b[i]/m)*300);
+  });
+}
+
+function line(a){
+  let m=Math.max(...a); axes(m);
+  ctx.strokeStyle="blue";
+  ctx.beginPath();
+  a.forEach((v,i)=>{
+    let x=50+i*55;
+    let y=400-(v/m)*300;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function hist(a){
+  let m=Math.max(...a); axes(m);
+  ctx.fillStyle="purple";
+  a.forEach((v,i)=>{
+    ctx.fillRect(60+i*45,400-(v/m)*300,45,(v/m)*300);
+  });
+}
+
+function polygon(a){
+  let m=Math.max(...a); axes(m);
+  ctx.strokeStyle="orange";
+  ctx.beginPath();
+  a.forEach((v,i)=>{
+    let x=75+i*55;
+    let y=400-(v/m)*300;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function curve(a){
+  polygon(a); // smooth approx (school level)
+}
+
+function ogive(a){
+  a.sort((x,y)=>x-y);
+  let c=[];
+  a.reduce((s,v,i)=>c[i]=s+v,0);
+  line(c);
+}
+
+function pie(raw){
+  let p=raw.split(",");
+  let v=[],l=[];
+  p.forEach(x=>{
+    let s=x.split("=");
+    l.push(s[0]); v.push(Number(s[1]));
+  });
+  let sum=v.reduce((a,b)=>a+b,0);
+  let ang=0;
+  v.forEach((x,i)=>{
+    let a=(x/sum)*2*Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(350,220);
+    ctx.arc(350,220,150,ang,ang+a);
+    ctx.fillStyle=`hsl(${i*60},70%,60%)`;
+    ctx.fill();
+    ang+=a;
+  });
+}
+</script>
+
+</body>
+</html>

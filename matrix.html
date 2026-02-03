@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Matrix Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  color: white;
+  display: flex;
+  justify-content: center;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+}
+
+h2 {
+  text-align: center;
+  font-weight: 500;
+}
+
+label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  background: #1e222b;
+  border: none;
+  color: white;
+  border-radius: 6px;
+}
+
+.matrix {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.matrix input {
+  text-align: center;
+}
+
+button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: #2f80ed;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.result, .steps {
+  margin-top: 10px;
+  background: #1e222b;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <h2>Matrix Calculator</h2>
+
+  <label>Rows</label>
+  <input id="rows" type="number" value="2" min="1">
+
+  <label>Columns</label>
+  <input id="cols" type="number" value="2" min="1">
+
+  <button onclick="createMatrices()">Create Matrices A & B</button>
+
+  <h3>Matrix A</h3>
+  <div id="matrixA" class="matrix"></div>
+
+  <h3>Matrix B</h3>
+  <div id="matrixB" class="matrix"></div>
+
+  <button onclick="add()">A + B</button>
+  <button onclick="subtract()">A − B</button>
+  <button onclick="multiply()">A × B</button>
+  <button onclick="transpose()">Transpose A</button>
+  <button onclick="scalar()">Scalar × A</button>
+  <button onclick="determinant()">Determinant of A</button>
+
+  <div id="result" class="result"></div>
+  <div id="steps" class="steps"></div>
+</div>
+
+<script>
+function createMatrices() {
+  const r = +rows.value;
+  const c = +cols.value;
+
+  create("matrixA", r, c);
+  create("matrixB", r, c);
+}
+
+function create(id, r, c) {
+  const box = document.getElementById(id);
+  box.innerHTML = "";
+  box.style.gridTemplateColumns = `repeat(${c}, 1fr)`;
+
+  for (let i = 0; i < r * c; i++) {
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.value = 0;
+    box.appendChild(inp);
+  }
+}
+
+createMatrices();
+
+function read(id) {
+  const r = +rows.value;
+  const c = +cols.value;
+  const inputs = document.querySelectorAll(`#${id} input`);
+  let m = [], k = 0;
+
+  for (let i = 0; i < r; i++) {
+    let row = [];
+    for (let j = 0; j < c; j++) {
+      row.push(+inputs[k++].value);
+    }
+    m.push(row);
+  }
+  return m;
+}
+
+function show(m) {
+  return m.map(r => r.join("  ")).join("<br>");
+}
+
+/* ADD */
+function add() {
+  const A = read("matrixA");
+  const B = read("matrixB");
+  const R = A.map((r,i)=>r.map((v,j)=>v+B[i][j]));
+
+  result.innerHTML = "<b>A + B</b><br>" + show(R);
+  steps.innerHTML =
+    "Step 1: Take same position numbers from A and B<br>" +
+    "Step 2: Add them<br>" +
+    "Example: a₁₁ + b₁₁";
+}
+
+/* SUBTRACT */
+function subtract() {
+  const A = read("matrixA");
+  const B = read("matrixB");
+  const R = A.map((r,i)=>r.map((v,j)=>v-B[i][j]));
+
+  result.innerHTML = "<b>A − B</b><br>" + show(R);
+  steps.innerHTML =
+    "Step 1: Take same position numbers<br>" +
+    "Step 2: Subtract B from A";
+}
+
+/* MULTIPLY */
+function multiply() {
+  const A = read("matrixA");
+  const B = read("matrixB");
+  const r = A.length, c = B[0].length, n = B.length;
+  let R = Array.from({length:r},()=>Array(c).fill(0));
+
+  for (let i=0;i<r;i++)
+    for (let j=0;j<c;j++)
+      for (let k=0;k<n;k++)
+        R[i][j] += A[i][k]*B[k][j];
+
+  result.innerHTML = "<b>A × B</b><br>" + show(R);
+  steps.innerHTML =
+    "Row of A × Column of B<br>" +
+    "Multiply → then add";
+}
+
+/* TRANSPOSE */
+function transpose() {
+  const A = read("matrixA");
+  const T = A[0].map((_,i)=>A.map(r=>r[i]));
+
+  result.innerHTML = "<b>Transpose</b><br>" + show(T);
+  steps.innerHTML = "Rows become columns";
+}
+
+/* SCALAR */
+function scalar() {
+  const k = +prompt("Enter number");
+  const A = read("matrixA");
+  const R = A.map(r=>r.map(v=>v*k));
+
+  result.innerHTML = "<b>Scalar × A</b><br>" + show(R);
+  steps.innerHTML = "Multiply every element by " + k;
+}
+
+/* DETERMINANT */
+function determinant() {
+  const A = read("matrixA");
+  if (A.length !== 2 || A[0].length !== 2) {
+    result.innerHTML = "Only 2×2 explained";
+    return;
+  }
+
+  const det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+  result.innerHTML = "<b>Determinant</b> = " + det;
+  steps.innerHTML =
+    "Formula: ad − bc<br>" +
+    "Multiply diagonals and subtract";
+}
+</script>
+</body>
+</html>

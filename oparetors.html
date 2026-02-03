@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Programmer / CS Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:#15181e;
+  color:white;
+  padding:16px;
+  overflow:auto;
+}
+h2{
+  text-align:center;
+  opacity:.9;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#1e222b;
+  border:none;
+  color:white;
+  border-radius:8px;
+  font-size:16px;
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  background:#2f80ed;
+  border:none;
+  color:white;
+  font-size:16px;
+  border-radius:8px;
+}
+.result{
+  margin-top:14px;
+  font-size:18px;
+}
+.explain{
+  margin-top:10px;
+  background:#1e222b;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h2>🧑‍💻 Programmer / CS Calculator</h2>
+
+<input id="a" placeholder="Enter first number">
+<input id="b" placeholder="Enter second number (if needed)">
+
+<select id="op">
+  <optgroup label="Bitwise Operators">
+    <option value="and">& AND</option>
+    <option value="or">| OR</option>
+    <option value="xor">^ XOR</option>
+    <option value="not">~ NOT</option>
+    <option value="lshift">&lt;&lt; Left Shift</option>
+    <option value="rshift">&gt;&gt; Right Shift</option>
+  </optgroup>
+
+  <optgroup label="Logical Operators">
+    <option value="land">&& Logical AND</option>
+    <option value="lor">|| Logical OR</option>
+    <option value="lnot">! Logical NOT</option>
+  </optgroup>
+
+  <optgroup label="Boolean Algebra (0 / 1)">
+    <option value="booland">Boolean AND</option>
+    <option value="boolor">Boolean OR</option>
+    <option value="boolxor">Boolean XOR</option>
+  </optgroup>
+
+  <optgroup label="Number Conversion">
+    <option value="d2b">Decimal → Binary</option>
+    <option value="d2o">Decimal → Octal</option>
+    <option value="d2h">Decimal → Hex</option>
+    <option value="b2d">Binary → Decimal</option>
+    <option value="floatbin">Decimal → Binary (Float)</option>
+  </optgroup>
+</select>
+
+<button onclick="calculate()">Calculate</button>
+
+<div class="result" id="result"></div>
+<div class="explain" id="explain"></div>
+</div>
+
+<script>
+function calculate(){
+  let a = document.getElementById("a").value;
+  let b = document.getElementById("b").value;
+  let op = document.getElementById("op").value;
+
+  let x = Number(a);
+  let y = Number(b);
+  let res="", exp="";
+
+  switch(op){
+
+    case "and":
+      res = x & y;
+      exp = `AND checks each binary bit.\nOnly 1 & 1 gives 1.\nAnswer = ${res}`;
+      break;
+
+    case "or":
+      res = x | y;
+      exp = `OR means any 1 gives 1.\nAnswer = ${res}`;
+      break;
+
+    case "xor":
+      res = x ^ y;
+      exp = `XOR means different bits give 1.\nAnswer = ${res}`;
+      break;
+
+    case "not":
+      res = ~x;
+      exp = `NOT flips all bits.\nAnswer = ${res}`;
+      break;
+
+    case "lshift":
+      res = x << y;
+      exp = `Left shift moves bits left.\nMultiplies by 2.\nAnswer = ${res}`;
+      break;
+
+    case "rshift":
+      res = x >> y;
+      exp = `Right shift moves bits right.\nDivides by 2.\nAnswer = ${res}`;
+      break;
+
+    case "land":
+      res = (x && y)?1:0;
+      exp = `Logical AND checks TRUE or FALSE.\nBoth must be true.`;
+      break;
+
+    case "lor":
+      res = (x || y)?1:0;
+      exp = `Logical OR checks if any is TRUE.`;
+      break;
+
+    case "lnot":
+      res = (!x)?1:0;
+      exp = `Logical NOT reverses truth value.`;
+      break;
+
+    case "booland":
+      res = (a==="1" && b==="1")?1:0;
+      exp = `Boolean AND:\n1 AND 1 = 1`;
+      break;
+
+    case "boolor":
+      res = (a==="1" || b==="1")?1:0;
+      exp = `Boolean OR:\nAny 1 gives 1`;
+      break;
+
+    case "boolxor":
+      res = (a!==b)?1:0;
+      exp = `Boolean XOR:\nDifferent values give 1`;
+      break;
+
+    case "d2b":
+      res = x.toString(2);
+      exp = `Decimal converted to Binary.`;
+      break;
+
+    case "d2o":
+      res = x.toString(8);
+      exp = `Decimal converted to Octal.`;
+      break;
+
+    case "d2h":
+      res = x.toString(16).toUpperCase();
+      exp = `Decimal converted to Hexadecimal.`;
+      break;
+
+    case "b2d":
+      res = parseInt(a,2);
+      exp = `Binary converted to Decimal.`;
+      break;
+
+    case "floatbin":
+      let i = Math.floor(x);
+      let f = x - i;
+      let bi = i.toString(2);
+      let bf = "";
+      for(let k=0;k<6;k++){
+        f*=2;
+        bf+=Math.floor(f);
+        f-=Math.floor(f);
+      }
+      res = bi+"."+bf;
+      exp = `Decimal number converted into binary form step by step.`;
+      break;
+  }
+
+  document.getElementById("result").innerHTML =
+    `<b>Answer:</b> ${res}`;
+  document.getElementById("explain").innerText = exp;
+}
+</script>
+
+</body>
+</html>

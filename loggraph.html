@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Math Graph</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  padding: 12px;
+  color: white;
+}
+
+canvas {
+  background: white;
+  display: block;
+  margin: 10px auto;
+  border-radius: 8px;
+  cursor: grab;
+}
+
+canvas:active { cursor: grabbing; }
+
+input, select, button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+}
+
+input, select {
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  background: #2f80ed;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h3 style="text-align:center;">Exponential & Log Graph</h3>
+
+<canvas id="c" width="360" height="360"></canvas>
+
+<select id="type">
+  <option value="exp">y = eˣ</option>
+  <option value="pow">y = aˣ</option>
+  <option value="log">y = log x</option>
+  <option value="ln">y = ln x</option>
+</select>
+
+<input id="a" placeholder="a value (for aˣ)">
+<input id="xs" placeholder="Start x">
+<input id="xe" placeholder="End x">
+<input id="step" placeholder="Step (ex: 0.1)">
+
+<button onclick="draw()">Draw Graph</button>
+</div>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+let offX = 0, offY = 0, drag=false, px, py;
+let data = null;
+
+canvas.onmousedown = e => { drag=true; px=e.offsetX; py=e.offsetY; };
+canvas.onmouseup = () => drag=false;
+canvas.onmouseleave = () => drag=false;
+canvas.onmousemove = e => {
+  if(!drag) return;
+  offX += e.offsetX - px;
+  offY += e.offsetY - py;
+  px=e.offsetX; py=e.offsetY;
+  redraw();
+};
+
+function func(type,x,a){
+  if(type==="exp") return Math.exp(x);
+  if(type==="pow") return Math.pow(a,x);
+  if(type==="log" && x>0) return Math.log10(x);
+  if(type==="ln" && x>0) return Math.log(x);
+  return NaN;
+}
+
+function draw(){
+  offX=offY=0;
+  const type = document.getElementById("type").value;
+  const a = Number(document.getElementById("a").value)||2;
+  const xs = Number(document.getElementById("xs").value);
+  const xe = Number(document.getElementById("xe").value);
+  const h  = Number(document.getElementById("step").value);
+
+  let pts=[];
+  for(let x=xs;x<=xe;x+=h){
+    let y=func(type,x,a);
+    if(isFinite(y)) pts.push({x,y});
+  }
+
+  const ys=pts.map(p=>p.y);
+  data={
+    xs,xe,
+    ysMin:Math.min(...ys),
+    ysMax:Math.max(...ys),
+    pts
+  };
+  redraw();
+}
+
+function redraw(){
+  if(!data) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const {xs,xe,ysMin,ysMax,pts}=data;
+
+  // axes
+  const zx = (-xs)/(xe-xs)*canvas.width + offX;
+  const zy = (ysMax)/(ysMax-ysMin)*canvas.height + offY;
+
+  ctx.strokeStyle="black";
+  ctx.beginPath();
+  ctx.moveTo(0,zy); ctx.lineTo(canvas.width,zy);
+  ctx.moveTo(zx,0); ctx.lineTo(zx,canvas.height);
+  ctx.stroke();
+
+  // scale
+  ctx.fillStyle="black";
+  ctx.font="10px Arial";
+  for(let i=Math.ceil(xs);i<=xe;i++){
+    let x=(i-xs)/(xe-xs)*canvas.width+offX;
+    ctx.fillText(i,x-5,zy+12);
+  }
+  for(let j=Math.ceil(ysMin);j<=ysMax;j++){
+    let y=(ysMax-j)/(ysMax-ysMin)*canvas.height+offY;
+    ctx.fillText(j,zx+4,y+3);
+  }
+
+  // graph
+  ctx.strokeStyle="red";
+  ctx.beginPath();
+  pts.forEach((p,i)=>{
+    let x=(p.x-xs)/(xe-xs)*canvas.width+offX;
+    let y=(ysMax-p.y)/(ysMax-ysMin)*canvas.height+offY;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+</script>
+
+</body>
+</html>

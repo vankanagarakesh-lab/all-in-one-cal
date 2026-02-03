@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pan Graph</title>
+<meta name="viewport" content="width=device-width">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.app{
+  width:380px;
+  background:#15181e;
+  padding:10px;
+  color:white;
+}
+canvas{
+  background:white;
+  display:block;
+  margin:10px auto;
+  border-radius:6px;
+  cursor:grab;
+}
+canvas:active{ cursor:grabbing; }
+input,select,button{
+  width:100%;
+  padding:6px;
+  margin-top:6px;
+  border:none;
+  border-radius:4px;
+}
+input,select{ background:#1e222b; color:white; }
+button{ background:#2f80ed; color:white; }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h3 style="text-align:center">Move the Graph</h3>
+
+<canvas id="c" width="350" height="350"></canvas>
+
+<select id="type">
+  <option value="1x">y = 1/x</option>
+  <option value="1x2">y = 1/x²</option>
+  <option value="sqrt">y = √x</option>
+  <option value="cuberoot">y = ∛x</option>
+</select>
+
+<input id="range" placeholder="Range (example: 10)">
+<button onclick="draw()">Draw Graph</button>
+</div>
+
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+
+let offsetX = 0, offsetY = 0;
+let dragging = false;
+let lastX = 0, lastY = 0;
+let R = 10;
+let points = [];
+
+c.addEventListener("mousedown", e=>{
+  dragging = true;
+  lastX = e.offsetX;
+  lastY = e.offsetY;
+});
+
+c.addEventListener("mouseup", ()=> dragging=false);
+c.addEventListener("mouseleave", ()=> dragging=false);
+
+c.addEventListener("mousemove", e=>{
+  if(!dragging) return;
+  offsetX += e.offsetX - lastX;
+  offsetY += e.offsetY - lastY;
+  lastX = e.offsetX;
+  lastY = e.offsetY;
+  redraw();
+});
+
+function f(x){
+  let t = document.getElementById("type").value;
+  if(t==="1x" && x!==0) return 1/x;
+  if(t==="1x2" && x!==0) return 1/(x*x);
+  if(t==="sqrt" && x>=0) return Math.sqrt(x);
+  if(t==="cuberoot") return Math.cbrt(x);
+  return null;
+}
+
+function draw(){
+  offsetX = offsetY = 0;
+  R = Number(document.getElementById("range").value) || 10;
+  points = [];
+  for(let x=-R;x<=R;x+=0.05){
+    let y = f(x);
+    if(y!==null && isFinite(y)) points.push({x,y});
+  }
+  redraw();
+}
+
+function redraw(){
+  ctx.clearRect(0,0,350,350);
+
+  let cx = 175 + offsetX;
+  let cy = 175 + offsetY;
+  let scale = 175 / R;
+
+  // axes
+  ctx.strokeStyle="black";
+  ctx.beginPath();
+  ctx.moveTo(0,cy); ctx.lineTo(350,cy);
+  ctx.moveTo(cx,0); ctx.lineTo(cx,350);
+  ctx.stroke();
+
+  // scale numbers
+  ctx.fillStyle="black";
+  ctx.font="10px Arial";
+  for(let i=-R;i<=R;i++){
+    ctx.fillText(i,cx+i*scale-4,cy+12);
+    ctx.fillText(i,cx+4,cy-i*scale+3);
+  }
+
+  // graph
+  ctx.strokeStyle="red";
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    let x = cx + p.x * scale;
+    let y = cy - p.y * scale;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+</script>
+
+</body>
+</html>

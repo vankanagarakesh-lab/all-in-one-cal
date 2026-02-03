@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Power & Root Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: system-ui, Arial;
+}
+
+.calculator {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  max-height: 760px;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: #1e222b;
+  color: white;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+button {
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.clear {
+  background: #ff7675;
+  color: black;
+}
+
+.output {
+  margin-top: 18px;
+  font-size: 15px;
+  line-height: 1.6;
+  background: #1e222b;
+  padding: 14px;
+  border-radius: 10px;
+  overflow-y: auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+  <h2>Learn Power & Roots</h2>
+
+  <input id="x" type="number" placeholder="Enter a number (x)">
+  <input id="y" type="number" placeholder="Enter another number (y if needed)">
+
+  <div class="buttons">
+    <button onclick="square()">Square (x²)</button>
+    <button onclick="cube()">Cube (x³)</button>
+    <button onclick="power()">Power (xʸ)</button>
+    <button onclick="sqrt()">Square Root (√x)</button>
+    <button onclick="cuberoot()">Cube Root (∛x)</button>
+    <button onclick="nthroot()">Nth Root (ⁿ√x)</button>
+    <button onclick="reciprocal()">Reciprocal (1/x)</button>
+    <button class="clear" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div id="output" class="output"></div>
+
+</div>
+
+<script>
+const xInput = document.getElementById("x");
+const yInput = document.getElementById("y");
+const output = document.getElementById("output");
+
+function square() {
+  const x = Number(xInput.value);
+  const ans = x * x;
+
+  output.innerHTML = `
+  You entered the number <b>${x}</b>.<br><br>
+
+  Square means:<br>
+  Multiply the number by itself.<br><br>
+
+  Step 1: Write the multiplication<br>
+  ${x} × ${x}<br><br>
+
+  Step 2: Multiply<br>
+  ${x} × ${x} = ${ans}<br><br>
+
+  ✅ Final Answer: <b>${ans}</b>
+  `;
+}
+
+function cube() {
+  const x = Number(xInput.value);
+  const ans = x * x * x;
+
+  output.innerHTML = `
+  You entered the number <b>${x}</b>.<br><br>
+
+  Cube means:<br>
+  Multiply the number three times.<br><br>
+
+  Step 1: Write the multiplication<br>
+  ${x} × ${x} × ${x}<br><br>
+
+  Step 2: Multiply step by step<br>
+  ${x} × ${x} = ${x * x}<br>
+  ${x * x} × ${x} = ${ans}<br><br>
+
+  ✅ Final Answer: <b>${ans}</b>
+  `;
+}
+
+function power() {
+  const x = Number(xInput.value);
+  const y = Number(yInput.value);
+
+  let steps = "";
+  let value = 1;
+
+  for (let i = 1; i <= y; i++) {
+    value *= x;
+    steps += `Step ${i}: ${value}<br>`;
+  }
+
+  output.innerHTML = `
+  You entered:<br>
+  x = ${x}, y = ${y}<br><br>
+
+  Power means:<br>
+  Multiply ${x} by itself ${y} times.<br><br>
+
+  ${steps}<br>
+  ✅ Final Answer: <b>${value}</b>
+  `;
+}
+
+function sqrt() {
+  const x = Number(xInput.value);
+  const ans = Math.sqrt(x);
+
+  output.innerHTML = `
+  You entered the number <b>${x}</b>.<br><br>
+
+  Square root means:<br>
+  Find a number which multiplied by itself gives ${x}.<br><br>
+
+  ${ans} × ${ans} = ${x}<br><br>
+
+  ✅ Final Answer: <b>${ans}</b>
+  `;
+}
+
+function cuberoot() {
+  const x = Number(xInput.value);
+  const ans = Math.cbrt(x);
+
+  output.innerHTML = `
+  Cube root means:<br>
+  Find a number which multiplied three times gives ${x}.<br><br>
+
+  ${ans} × ${ans} × ${ans} = ${x}<br><br>
+
+  ✅ Final Answer: <b>${ans}</b>
+  `;
+}
+
+function nthroot() {
+  const x = Number(xInput.value);
+  const y = Number(yInput.value);
+  const ans = Math.pow(x, 1 / y);
+
+  output.innerHTML = `
+  Nth root means:<br>
+  A number which multiplied ${y} times gives ${x}.<br><br>
+
+  ${ans}<sup>${y}</sup> = ${x}<br><br>
+
+  ✅ Final Answer: <b>${ans}</b>
+  `;
+}
+
+function reciprocal() {
+  const x = Number(xInput.value);
+  const ans = 1 / x;
+
+  output.innerHTML = `
+  Reciprocal means:<br>
+  Divide 1 by the number.<br><br>
+
+  1 ÷ ${x} = ${ans}<br><br>
+
+  ✅ Final Answer: <b>${ans}</b>
+  `;
+}
+
+function clearAll() {
+  xInput.value = "";
+  yInput.value = "";
+  output.innerHTML = "";
+}
+</script>
+
+</body>
+</html>

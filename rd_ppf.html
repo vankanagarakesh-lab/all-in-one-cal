@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RD & PPF Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:#15181e;
+  color:white;
+  padding:16px;
+  overflow:auto;
+}
+
+h2{
+  text-align:center;
+  opacity:0.9;
+}
+
+select,input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#1e222b;
+  color:white;
+  font-size:16px;
+}
+
+button{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  background:#2f80ed;
+  border:none;
+  color:white;
+  border-radius:8px;
+  font-size:16px;
+}
+
+.result{
+  margin-top:16px;
+  background:#1e222b;
+  padding:12px;
+  border-radius:8px;
+  font-size:15px;
+  line-height:1.6;
+}
+
+canvas{
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>RD & PPF Calculator</h2>
+
+  <select id="type">
+    <option value="RD">Recurring Deposit (RD)</option>
+    <option value="PPF">PPF (India)</option>
+  </select>
+
+  <input id="amount" placeholder="Monthly Deposit (₹)">
+  <input id="rate" placeholder="Interest Rate (%)">
+  <input id="years" placeholder="Time (Years)">
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div id="result" class="result"></div>
+
+  <canvas id="pie"></canvas>
+</div>
+
+<script>
+let chart;
+
+function calculate(){
+  const type = document.getElementById("type").value;
+  const P = Number(amount.value);
+  const r = Number(rate.value)/100;
+  const n = Number(years.value);
+
+  let invested, maturity, interest;
+
+  if(type === "RD"){
+    invested = P * 12 * n;
+
+    maturity = P * (
+      (Math.pow(1+r/4, 4*n)-1) / (1-Math.pow(1+r/4, -1/3))
+    );
+
+  }else{
+    invested = P * n;
+    maturity = P * ((Math.pow(1+r, n)-1)/r) * (1+r);
+  }
+
+  interest = maturity - invested;
+
+  document.getElementById("result").innerHTML = `
+    <b>Total Invested:</b> ₹${invested.toFixed(0)}<br>
+    <b>Interest Earned:</b> ₹${interest.toFixed(0)}<br>
+    <b>Maturity Amount:</b> ₹${maturity.toFixed(0)}
+  `;
+
+  drawPie(invested, interest);
+}
+
+function drawPie(invested, interest){
+  if(chart) chart.destroy();
+
+  chart = new Chart(pie,{
+    type:"pie",
+    data:{
+      labels:["Invested","Interest"],
+      datasets:[{
+        data:[invested, interest]
+      }]
+    }
+  });
+}
+</script>
+
+</body>
+</html>

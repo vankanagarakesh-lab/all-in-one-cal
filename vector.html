@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vector Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui;
+  display:flex;
+  justify-content:center;
+  color:white;
+}
+.app{
+  max-width:420px;
+  width:100%;
+  padding:16px;
+}
+h2{text-align:center;}
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:8px;
+  border:none;
+  background:#1e222b;
+  color:white;
+}
+button{
+  background:#2f80ed;
+  font-weight:600;
+}
+.box{
+  background:#1e222b;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.7;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<h2>Vector Operations</h2>
+
+<input id="ax" type="number" placeholder="Ax (Vector A X-value)">
+<input id="ay" type="number" placeholder="Ay (Vector A Y-value)">
+<input id="bx" type="number" placeholder="Bx (Vector B X-value)">
+<input id="by" type="number" placeholder="By (Vector B Y-value)">
+
+<select id="op">
+  <option value="add">Vector Addition (A + B)</option>
+  <option value="sub">Vector Subtraction (A − B)</option>
+  <option value="dot">Dot Product (A · B)</option>
+  <option value="cross">Cross Product (A × B)</option>
+  <option value="mag">Magnitude of Vector A</option>
+  <option value="unit">Unit Vector of A</option>
+  <option value="angle">Angle Between A & B</option>
+</select>
+
+<button onclick="calculate()">Calculate</button>
+
+<div id="answer" class="box"></div>
+<div id="steps" class="box"></div>
+</div>
+
+<script>
+function calculate(){
+  const Ax=+ax.value, Ay=+ay.value;
+  const Bx=+bx.value, By=+by.value;
+  const opv=op.value;
+
+  let ans="", explain="";
+
+  /* ADDITION */
+  if(opv==="add"){
+    ans = `(${Ax+Bx}, ${Ay+By})`;
+    explain = `
+Step 1: Write both vectors  
+A = (${Ax}, ${Ay})  
+B = (${Bx}, ${By})
+
+Step 2: Add X values  
+Ax + Bx = ${Ax} + ${Bx} = ${Ax+Bx}
+
+Step 3: Add Y values  
+Ay + By = ${Ay} + ${By} = ${Ay+By}
+
+Step 4: Combine results  
+Answer = (${Ax+Bx}, ${Ay+By})
+`;
+  }
+
+  /* SUBTRACTION */
+  if(opv==="sub"){
+    ans = `(${Ax-Bx}, ${Ay-By})`;
+    explain = `
+Step 1: Write vectors  
+A = (${Ax}, ${Ay})  
+B = (${Bx}, ${By})
+
+Step 2: Subtract X values  
+Ax − Bx = ${Ax} − ${Bx} = ${Ax-Bx}
+
+Step 3: Subtract Y values  
+Ay − By = ${Ay} − ${By} = ${Ay-By}
+
+Step 4: Final vector  
+(${Ax-Bx}, ${Ay-By})
+`;
+  }
+
+  /* DOT PRODUCT */
+  if(opv==="dot"){
+    const dot = Ax*Bx + Ay*By;
+    ans = dot;
+    explain = `
+Step 1: Formula  
+A · B = Ax×Bx + Ay×By
+
+Step 2: Substitute values  
+= (${Ax}×${Bx}) + (${Ay}×${By})
+
+Step 3: Calculate  
+= ${Ax*Bx} + ${Ay*By}
+
+Step 4: Final Answer  
+= ${dot}
+`;
+  }
+
+  /* CROSS PRODUCT */
+  if(opv==="cross"){
+    const cross = Ax*By - Ay*Bx;
+    ans = `${cross} k`;
+    explain = `
+Step 1: Formula  
+A × B = AxBy − AyBx
+
+Step 2: Substitute values  
+= (${Ax}×${By}) − (${Ay}×${Bx})
+
+Step 3: Calculate  
+= ${Ax*By} − ${Ay*Bx}
+
+Step 4: Final Answer  
+= ${cross} k (direction along Z-axis)
+`;
+  }
+
+  /* MAGNITUDE */
+  if(opv==="mag"){
+    const mag = Math.sqrt(Ax*Ax + Ay*Ay);
+    ans = mag.toFixed(3);
+    explain = `
+Step 1: Formula  
+|A| = √(Ax² + Ay²)
+
+Step 2: Substitute  
+= √(${Ax}² + ${Ay}²)
+
+Step 3: Calculate  
+= √(${Ax*Ax + Ay*Ay})
+
+Step 4: Final Answer  
+= ${mag.toFixed(3)}
+`;
+  }
+
+  /* UNIT VECTOR */
+  if(opv==="unit"){
+    const mag = Math.sqrt(Ax*Ax + Ay*Ay);
+    ans = `(${(Ax/mag).toFixed(3)}, ${(Ay/mag).toFixed(3)})`;
+    explain = `
+Step 1: Find magnitude of A  
+|A| = ${mag.toFixed(3)}
+
+Step 2: Divide each component by magnitude  
+Ax/|A| = ${Ax}/${mag.toFixed(3)}  
+Ay/|A| = ${Ay}/${mag.toFixed(3)}
+
+Step 3: Unit Vector  
+(${(Ax/mag).toFixed(3)}, ${(Ay/mag).toFixed(3)})
+`;
+  }
+
+  /* ANGLE */
+  if(opv==="angle"){
+    const dot = Ax*Bx + Ay*By;
+    const magA = Math.sqrt(Ax*Ax + Ay*Ay);
+    const magB = Math.sqrt(Bx*Bx + By*By);
+    const theta = Math.acos(dot/(magA*magB))*180/Math.PI;
+
+    ans = theta.toFixed(2)+"°";
+    explain = `
+Step 1: Formula  
+cosθ = (A·B) / (|A||B|)
+
+Step 2: Substitute  
+= ${dot} / (${magA.toFixed(3)} × ${magB.toFixed(3)})
+
+Step 3: Find θ  
+θ = cos⁻¹(value)
+
+Step 4: Final Angle  
+= ${theta.toFixed(2)}°
+`;
+  }
+
+  answer.innerHTML = "<b>Answer:</b><br>"+ans;
+  steps.innerHTML = "<b>Step-by-step Explanation:</b><br>"+explain.replace(/\n/g,"<br>");
+}
+</script>
+</body>
+</html>

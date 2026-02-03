@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Math Smart Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+h2 {
+  text-align: center;
+  opacity: 0.9;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  background: #1e222b;
+  color: white;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button {
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+.clear {
+  background: #ff7675;
+  color: black;
+}
+
+.result {
+  margin-top: 14px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.explain {
+  margin-top: 10px;
+  background: #1e222b;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h2>Math Smart Calculator 🧠</h2>
+
+<input id="num1" placeholder="Enter number">
+<input id="num2" placeholder="Enter second number (if needed)">
+
+<div class="buttons">
+<button onclick="calc('log')">log</button>
+<button onclick="calc('ln')">ln</button>
+<button onclick="calc('antilog')">10ˣ</button>
+<button onclick="calc('exp')">eˣ</button>
+
+<button onclick="calc('fact')">n!</button>
+<button onclick="calc('npr')">nPr</button>
+<button onclick="calc('ncr')">nCr</button>
+
+<button onclick="calc('pi')">π</button>
+<button onclick="calc('e')">e</button>
+
+<button class="clear" onclick="clearAll()">Clear</button>
+</div>
+
+<div id="result" class="result"></div>
+<div id="explain" class="explain"></div>
+</div>
+
+<script>
+function factorial(n) {
+  if (n < 0) return NaN;
+  let f = 1;
+  for (let i = 1; i <= n; i++) f *= i;
+  return f;
+}
+
+function calc(type) {
+  const a = Number(num1.value);
+  const b = Number(num2.value);
+  let ans = "";
+  let steps = "";
+
+  switch(type) {
+
+    case "log":
+      ans = Math.log10(a);
+      steps = `
+Step 1: log means "10 power what gives this number?"
+Step 2: Example: 10² = 100
+Step 3: So log(100) = 2
+Step 4: log(${a}) = ${ans.toFixed(4)}
+      `;
+      break;
+
+    case "ln":
+      ans = Math.log(a);
+      steps = `
+Step 1: ln means log with base e
+Step 2: e ≈ 2.718
+Step 3: ln tells how many times e is multiplied
+Step 4: ln(${a}) = ${ans.toFixed(4)}
+      `;
+      break;
+
+    case "antilog":
+      ans = Math.pow(10, a);
+      steps = `
+Step 1: Antilog means 10 power x
+Step 2: If x = ${a}
+Step 3: 10 × 10 × ... (${a} times)
+Step 4: Answer = ${ans}
+      `;
+      break;
+
+    case "exp":
+      ans = Math.exp(a);
+      steps = `
+Step 1: e ≈ 2.718
+Step 2: e power ${a}
+Step 3: Multiply e again and again
+Step 4: Answer = ${ans.toFixed(4)}
+      `;
+      break;
+
+    case "fact":
+      ans = factorial(a);
+      steps = `
+Step 1: Factorial means multiply numbers
+Step 2: ${a}! = ${a} × ${a-1} × ... × 1
+Step 3: Final answer = ${ans}
+      `;
+      break;
+
+    case "npr":
+      ans = factorial(a) / factorial(a - b);
+      steps = `
+Step 1: nPr means arrangement
+Step 2: Formula = n! / (n-r)!
+Step 3: ${a}! / (${a}-${b})!
+Step 4: Answer = ${ans}
+      `;
+      break;
+
+    case "ncr":
+      ans = factorial(a) / (factorial(b) * factorial(a - b));
+      steps = `
+Step 1: nCr means selection
+Step 2: Formula = n! / (r!(n-r)!)
+Step 3: ${a}! / (${b}! × ${a-b}!)
+Step 4: Answer = ${ans}
+      `;
+      break;
+
+    case "pi":
+      ans = Math.PI;
+      steps = `
+Step 1: π is a fixed number
+Step 2: Used in circles
+Step 3: π ≈ 3.14159
+      `;
+      break;
+
+    case "e":
+      ans = Math.E;
+      steps = `
+Step 1: e is a fixed number
+Step 2: Used in growth & logs
+Step 3: e ≈ 2.71828
+      `;
+      break;
+  }
+
+  result.innerHTML = `Answer = <b>${ans}</b>`;
+  explain.innerHTML = `<b>Easy Explanation:</b><br>${steps.replaceAll("\n","<br>")}`;
+}
+
+function clearAll() {
+  num1.value = "";
+  num2.value = "";
+  result.innerHTML = "";
+  explain.innerHTML = "";
+}
+</script>
+
+</body>
+</html>

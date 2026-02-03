@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EMI Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  font-family: system-ui, Arial, sans-serif;
+  background:#0f1115;
+  color:white;
+}
+.app{
+  max-width:420px;
+  margin:auto;
+  min-height:100vh;
+  padding:16px;
+  background:#15181e;
+}
+h2{text-align:center; font-weight:500;}
+label{font-size:14px; opacity:0.9;}
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0 16px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  background:#1e222b;
+  color:white;
+}
+button{
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#2f80ed;
+  color:white;
+}
+button:active{transform:scale(0.97);}
+.result{
+  margin-top:16px;
+  padding:12px;
+  background:#1e222b;
+  border-radius:8px;
+  text-align:center;
+  font-size:18px;
+}
+.explain{
+  margin-top:16px;
+  padding:12px;
+  background:#1e222b;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.7;
+}
+.clear{background:#ff7675; color:black; margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="app">
+<h2>EMI Calculator</h2>
+
+<label>Loan Amount (P)</label>
+<input id="p" type="number" placeholder="Example: 100000">
+
+<label>Annual Interest Rate (%)</label>
+<input id="r" type="number" placeholder="Example: 12">
+
+<label>Loan Time (Years)</label>
+<input id="t" type="number" placeholder="Example: 5">
+
+<button onclick="calcEMI()">Calculate EMI</button>
+<button class="clear" onclick="clearAll()">Clear</button>
+
+<div id="result" class="result"></div>
+<div id="explain" class="explain"></div>
+</div>
+
+<script>
+function calcEMI(){
+  const P = Number(document.getElementById('p').value);
+  const annualR = Number(document.getElementById('r').value);
+  const years = Number(document.getElementById('t').value);
+
+  if(!P || !annualR || !years){
+    alert('Please fill all values');
+    return;
+  }
+
+  const r = annualR / (12*100);   // monthly interest
+  const n = years * 12;           // number of months
+
+  const EMI = (P * r * Math.pow(1+r,n)) / (Math.pow(1+r,n)-1);
+  const totalPay = EMI * n;
+  const interest = totalPay - P;
+
+  document.getElementById('result').innerHTML =
+    `Monthly EMI = ₹${EMI.toFixed(2)}<br>
+     Total Payment = ₹${totalPay.toFixed(2)}<br>
+     Total Interest = ₹${interest.toFixed(2)}`;
+
+  document.getElementById('explain').innerHTML =
+  `<b>Step-by-Step Explanation (Very Easy)</b><br><br>
+  <b>Step 1:</b> Loan amount = ₹${P}<br>
+  <b>Step 2:</b> Annual interest = ${annualR}%<br>
+  Convert it to monthly:<br>
+  ${annualR} ÷ 12 ÷ 100 = ${r.toFixed(5)}<br><br>
+
+  <b>Step 3:</b> Time = ${years} years<br>
+  Convert to months:<br>
+  ${years} × 12 = ${n} months<br><br>
+
+  <b>Step 4:</b> EMI Formula:<br>
+  EMI = P × r × (1+r)<sup>n</sup> / ((1+r)<sup>n</sup> − 1)<br><br>
+
+  <b>Step 5:</b> Put values and calculate EMI.<br><br>
+
+  <b>Meaning:</b><br>
+  EMI is the fixed money you pay every month to clear your loan.`;
+}
+
+function clearAll(){
+  document.getElementById('p').value='';
+  document.getElementById('r').value='';
+  document.getElementById('t').value='';
+  document.getElementById('result').innerHTML='';
+  document.getElementById('explain').innerHTML='';
+}
+</script>
+</body>
+</html>

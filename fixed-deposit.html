@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FD Calculator with Pie Chart</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+h2 {
+  text-align: center;
+  font-weight: 500;
+}
+
+label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.result, .explanation {
+  margin-top: 16px;
+  font-size: 15px;
+  background: #1e222b;
+  padding: 14px;
+  border-radius: 10px;
+}
+
+canvas {
+  display: block;
+  margin: 16px auto;
+}
+.legend {
+  text-align: center;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>FD Calculator</h2>
+
+  <label>Principal Amount (₹)</label>
+  <input id="p" type="number" placeholder="Example: 100000">
+
+  <label>Interest Rate (% per year)</label>
+  <input id="r" type="number" placeholder="Example: 7">
+
+  <label>Time (Years)</label>
+  <input id="t" type="number" placeholder="Example: 5">
+
+  <label>Customer Type</label>
+  <select id="type">
+    <option value="normal">Normal Citizen</option>
+    <option value="senior">Senior Citizen (+0.5%)</option>
+  </select>
+
+  <button onclick="calculateFD()">Calculate FD</button>
+
+  <div id="result" class="result"></div>
+
+  <canvas id="pie" width="260" height="260"></canvas>
+  <div class="legend">
+    🟦 Principal &nbsp;&nbsp; 🟧 Interest
+  </div>
+
+  <div id="explanation" class="explanation"></div>
+</div>
+
+<script>
+function calculateFD() {
+  const P = Number(document.getElementById("p").value);
+  let R = Number(document.getElementById("r").value);
+  const T = Number(document.getElementById("t").value);
+  const type = document.getElementById("type").value;
+
+  if (!P || !R || !T) {
+    alert("Please enter all values");
+    return;
+  }
+
+  if (type === "senior") R += 0.5;
+
+  const A = P * Math.pow(1 + R / 100, T);
+  const interest = A - P;
+
+  document.getElementById("result").innerHTML = `
+    <b>Final Amount:</b> ₹${A.toFixed(2)}<br>
+    <b>Interest Earned:</b> ₹${interest.toFixed(2)}
+  `;
+
+  drawPie(P, interest);
+
+  document.getElementById("explanation").innerHTML = `
+    <b>Step-by-Step Explanation:</b><br><br>
+
+    1️⃣ You deposited ₹${P}<br>
+    2️⃣ Bank gives ${R}% interest per year<br>
+    3️⃣ Time = ${T} years<br><br>
+
+    4️⃣ Formula used by banks:<br>
+    A = P × (1 + R/100)ᵀ<br><br>
+
+    5️⃣ Final Amount = ₹${A.toFixed(2)}<br>
+    6️⃣ Interest = Final − Principal<br>
+    = ₹${A.toFixed(2)} − ₹${P}<br>
+    = ₹${interest.toFixed(2)}<br><br>
+
+    📊 Pie chart shows how much is your money and how much is bank interest.
+  `;
+}
+
+function drawPie(principal, interest) {
+  const canvas = document.getElementById("pie");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const total = principal + interest;
+  const principalAngle = (principal / total) * 2 * Math.PI;
+  const interestAngle = (interest / total) * 2 * Math.PI;
+
+  let start = 0;
+
+  ctx.fillStyle = "#2f80ed";
+  ctx.beginPath();
+  ctx.moveTo(130, 130);
+  ctx.arc(130, 130, 110, start, start + principalAngle);
+  ctx.fill();
+
+  start += principalAngle;
+
+  ctx.fillStyle = "#f2994a";
+  ctx.beginPath();
+  ctx.moveTo(130, 130);
+  ctx.arc(130, 130, 110, start, start + interestAngle);
+  ctx.fill();
+}
+</script>
+
+</body>
+</html>

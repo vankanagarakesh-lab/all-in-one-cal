@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Perfect Scaled Graph</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: Arial;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  padding: 10px;
+}
+
+canvas {
+  background: white;
+  display: block;
+  margin: auto;
+  border-radius: 10px;
+}
+
+select, input, button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
+
+select, input {
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  background: #2f80ed;
+  color: white;
+}
+
+.info {
+  margin-top: 10px;
+  background: #1e222b;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2 style="text-align:center;">Perfect Graph</h2>
+
+  <canvas id="canvas" width="360" height="360"></canvas>
+
+  <select id="type">
+    <option value="linear">Linear (y = mx + c)</option>
+    <option value="quadratic">Quadratic (y = ax²)</option>
+    <option value="cubic">Cubic (y = ax³)</option>
+    <option value="constant">Constant (y = c)</option>
+    <option value="identity">Identity (y = x)</option>
+    <option value="modulus">Modulus (y = |x|)</option>
+  </select>
+
+  <input id="a" placeholder="Enter a or m">
+  <input id="c" placeholder="Enter c">
+
+  <button onclick="draw()">Draw Graph</button>
+
+  <div id="info" class="info"></div>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const W = canvas.width;
+const H = canvas.height;
+
+function draw() {
+  const type = document.getElementById("type").value;
+  const a = Number(document.getElementById("a").value);
+  const c = Number(document.getElementById("c").value);
+
+  let points = [];
+  for (let x = -20; x <= 20; x += 0.1) {
+    points.push({ x, y: calc(type, x, a, c) });
+  }
+
+  autoScale(points);
+}
+
+function calc(type, x, a, c) {
+  if (type === "linear") return a * x + c;
+  if (type === "quadratic") return a * x * x;
+  if (type === "cubic") return a * x * x * x;
+  if (type === "constant") return c;
+  if (type === "identity") return x;
+  if (type === "modulus") return Math.abs(x);
+}
+
+function autoScale(points) {
+  const ys = points.map(p => p.y);
+  const max = Math.max(...ys.map(Math.abs));
+
+  const step = chooseStep(max);
+  const scale = (H / 2 - 30) / (step * 5);
+
+  drawAxes(step, scale);
+  plot(points, scale);
+
+  document.getElementById("info").innerHTML =
+    `<b>Scale explanation:</b><br>
+     Each grid = ${step} units<br>
+     Auto-adjusted for best fit`;
+}
+
+function chooseStep(max) {
+  if (max <= 10) return 1;
+  if (max <= 20) return 2;
+  if (max <= 50) return 5;
+  if (max <= 100) return 10;
+  return 20;
+}
+
+function drawAxes(step, scale) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = "black";
+
+  // X axis
+  ctx.beginPath();
+  ctx.moveTo(0, H / 2);
+  ctx.lineTo(W, H / 2);
+  ctx.stroke();
+
+  // Y axis
+  ctx.beginPath();
+  ctx.moveTo(W / 2, 0);
+  ctx.lineTo(W / 2, H);
+  ctx.stroke();
+
+  ctx.fillStyle = "black";
+  ctx.font = "12px Arial";
+
+  for (let i = -5; i <= 5; i++) {
+    const y = H / 2 - i * step * scale;
+    ctx.fillText(i * step, W / 2 + 5, y + 4);
+  }
+}
+
+function plot(points, scale) {
+  ctx.strokeStyle = "red";
+  ctx.beginPath();
+  let first = true;
+
+  points.forEach(p => {
+    const px = W / 2 + p.x * scale;
+    const py = H / 2 - p.y * scale;
+    if (first) {
+      ctx.moveTo(px, py);
+      first = false;
+    } else {
+      ctx.lineTo(px, py);
+    }
+  });
+
+  ctx.stroke();
+}
+</script>
+
+</body>
+</html>

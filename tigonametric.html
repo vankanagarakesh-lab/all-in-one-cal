@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trigonometry Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+h2 {
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #1e222b;
+  color: white;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+button {
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.result {
+  margin-top: 16px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.explanation {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  background: #1e222b;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.clear {
+  background: #ff7675;
+  color: black;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h2>Trigonometry Calculator</h2>
+
+<input id="angle" placeholder="Enter value">
+
+<select id="mode">
+  <option value="DEG">Degree (DEG)</option>
+  <option value="RAD">Radian (RAD)</option>
+  <option value="GRAD">Gradian (GRAD)</option>
+</select>
+
+<div class="buttons">
+  <button onclick="calc('sin')">sin</button>
+  <button onclick="calc('cos')">cos</button>
+  <button onclick="calc('tan')">tan</button>
+
+  <button onclick="calc('cot')">cot</button>
+  <button onclick="calc('sec')">sec</button>
+  <button onclick="calc('cosec')">cosec</button>
+
+  <button onclick="calc('asin')">sin⁻¹</button>
+  <button onclick="calc('acos')">cos⁻¹</button>
+  <button onclick="calc('atan')">tan⁻¹</button>
+
+  <button class="clear" onclick="clearAll()">Clear</button>
+</div>
+
+<div id="result" class="result"></div>
+<div id="explanation" class="explanation"></div>
+</div>
+
+<script>
+function toRadian(v, mode) {
+  if (mode === "DEG") return v * Math.PI / 180;
+  if (mode === "GRAD") return v * Math.PI / 200;
+  return v;
+}
+
+function calc(type) {
+  const input = Number(document.getElementById("angle").value);
+  const mode = document.getElementById("mode").value;
+  const rad = toRadian(input, mode);
+  let ans = 0;
+  let exp = "";
+
+  if (type === "sin") {
+    ans = Math.sin(rad);
+    exp = `
+<b>What is sin?</b><br>
+sin means <b>Opposite ÷ Hypotenuse</b><br><br>
+
+<b>Step 1:</b> Given angle = ${input}<br>
+<b>Step 2:</b> Convert to radians → ${rad.toFixed(4)}<br>
+<b>Step 3:</b> Apply sin formula<br>
+<b>Step 4:</b> sin(${input}) = ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "cos") {
+    ans = Math.cos(rad);
+    exp = `
+<b>What is cos?</b><br>
+cos means <b>Adjacent ÷ Hypotenuse</b><br><br>
+
+<b>Step 1:</b> Angle = ${input}<br>
+<b>Step 2:</b> Convert to radians<br>
+<b>Step 3:</b> Apply cos formula<br>
+<b>Answer:</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "tan") {
+    ans = Math.tan(rad);
+    exp = `
+<b>What is tan?</b><br>
+tan = sin ÷ cos<br><br>
+
+<b>Step 1:</b> Find sin(${input})<br>
+<b>Step 2:</b> Find cos(${input})<br>
+<b>Step 3:</b> Divide sin by cos<br>
+<b>Answer:</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "cot") {
+    ans = 1 / Math.tan(rad);
+    exp = `
+<b>What is cot?</b><br>
+cot = 1 ÷ tan<br><br>
+
+<b>Step 1:</b> Find tan(${input})<br>
+<b>Step 2:</b> Take reciprocal<br>
+<b>Answer:</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "sec") {
+    ans = 1 / Math.cos(rad);
+    exp = `
+<b>What is sec?</b><br>
+sec = 1 ÷ cos<br><br>
+
+<b>Step 1:</b> Find cos(${input})<br>
+<b>Step 2:</b> Take reciprocal<br>
+<b>Answer:</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "cosec") {
+    ans = 1 / Math.sin(rad);
+    exp = `
+<b>What is cosec?</b><br>
+cosec = 1 ÷ sin<br><br>
+
+<b>Step 1:</b> Find sin(${input})<br>
+<b>Step 2:</b> Take reciprocal<br>
+<b>Answer:</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "asin") {
+    ans = Math.asin(input);
+    exp = `
+<b>What is sin⁻¹?</b><br>
+It finds the angle whose sine is ${input}<br><br>
+<b>Answer (in radians):</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "acos") {
+    ans = Math.acos(input);
+    exp = `
+<b>What is cos⁻¹?</b><br>
+It finds the angle whose cosine is ${input}<br><br>
+<b>Answer (in radians):</b> ${ans.toFixed(6)}
+`;
+  }
+
+  if (type === "atan") {
+    ans = Math.atan(input);
+    exp = `
+<b>What is tan⁻¹?</b><br>
+It finds the angle whose tangent is ${input}<br><br>
+<b>Answer (in radians):</b> ${ans.toFixed(6)}
+`;
+  }
+
+  document.getElementById("result").textContent =
+    "Answer = " + ans.toFixed(6);
+
+  document.getElementById("explanation").innerHTML = exp;
+}
+
+function clearAll() {
+  document.getElementById("angle").value = "";
+  document.getElementById("result").textContent = "";
+  document.getElementById("explanation").textContent = "";
+}
+</script>
+
+</body>
+</html>

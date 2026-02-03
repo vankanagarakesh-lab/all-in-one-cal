@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Coordinate Geometry Graphs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+}
+select,input,button{
+  padding:8px;
+  font-size:16px;
+  margin:4px;
+}
+canvas{
+  background:white;
+  margin-top:10px;
+  border-radius:6px;
+}
+label{font-size:14px;}
+</style>
+</head>
+
+<body>
+
+<h2>📐 Coordinate Geometry Graphs</h2>
+
+<select id="type" onchange="updateFormula()">
+  <option value="line">Straight Line</option>
+  <option value="circle">Circle</option>
+  <option value="parabola">Parabola</option>
+  <option value="ellipse">Ellipse</option>
+  <option value="hyperbola">Hyperbola</option>
+</select>
+
+<br>
+
+<input id="p1" placeholder="m / r / a">
+<input id="p2" placeholder="c / b">
+
+<br>
+<label>Zoom:</label>
+<input type="range" min="10" max="60" value="25" id="zoom">
+
+<br>
+<button onclick="draw()">Draw Graph</button>
+
+<h3 id="formula"></h3>
+
+<canvas id="graph" width="600" height="450"></canvas>
+
+<script>
+const canvas = document.getElementById("graph");
+const ctx = canvas.getContext("2d");
+
+let scale = 25;
+
+function updateFormula(){
+  const t = type.value;
+  const f = document.getElementById("formula");
+
+  if(t==="line") f.innerText = "Formula: y = mx + c";
+  if(t==="circle") f.innerText = "Formula: x² + y² = r²";
+  if(t==="parabola") f.innerText = "Formula: y = ax²";
+  if(t==="ellipse") f.innerText = "Formula: x²/a² + y²/b² = 1";
+  if(t==="hyperbola") f.innerText = "Formula: x²/a² − y²/b² = 1";
+}
+
+updateFormula();
+
+function clear(){
+  ctx.clearRect(0,0,600,450);
+}
+
+function drawAxes(){
+  const cx=300, cy=225;
+
+  ctx.strokeStyle="black";
+  ctx.beginPath();
+  ctx.moveTo(0,cy); ctx.lineTo(600,cy);
+  ctx.moveTo(cx,0); ctx.lineTo(cx,450);
+  ctx.stroke();
+
+  ctx.fillStyle="black";
+  ctx.fillText("X",580,cy-5);
+  ctx.fillText("Y",cx+5,15);
+
+  for(let i=-10;i<=10;i++){
+    ctx.fillText(i,cx+i*scale-4,cy+15);
+    ctx.fillText(-i,cx+5,cy+i*scale+4);
+  }
+}
+
+function plot(x,y){
+  const cx=300, cy=225;
+  ctx.fillRect(cx+x*scale,cy-y*scale,2,2);
+}
+
+function draw(){
+  scale = Number(document.getElementById("zoom").value);
+  clear();
+  drawAxes();
+  ctx.fillStyle="blue";
+
+  const t = type.value;
+  const a = Number(p1.value)||1;
+  const b = Number(p2.value)||1;
+
+  if(t==="line"){
+    for(let x=-10;x<=10;x+=0.05){
+      plot(x,a*x+b);
+    }
+  }
+
+  if(t==="circle"){
+    for(let ang=0;ang<=360;ang+=0.5){
+      let r=ang*Math.PI/180;
+      plot(a*Math.cos(r),a*Math.sin(r));
+    }
+  }
+
+  if(t==="parabola"){
+    for(let x=-10;x<=10;x+=0.05){
+      plot(x,a*x*x);
+    }
+  }
+
+  if(t==="ellipse"){
+    for(let ang=0;ang<=360;ang+=0.5){
+      let r=ang*Math.PI/180;
+      plot(a*Math.cos(r),b*Math.sin(r));
+    }
+  }
+
+  if(t==="hyperbola"){
+    for(let x=1;x<=10;x+=0.05){
+      let y=Math.sqrt((x*x)/(a*a)-1)*b;
+      plot(x,y); plot(x,-y);
+      plot(-x,y); plot(-x,-y);
+    }
+  }
+}
+</script>
+
+</body>
+</html>

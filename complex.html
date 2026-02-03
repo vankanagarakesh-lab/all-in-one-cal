@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Complex Number Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #fff;
+  margin: 0;
+  padding: 15px;
+}
+
+h1 {
+  text-align: center;
+  color: #38bdf8;
+}
+
+.box {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 14px;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 16px;
+}
+
+button {
+  background: #38bdf8;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.result {
+  background: #020617;
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-line;
+  font-size: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧮 Complex Number Calculator</h1>
+
+<div class="box">
+  <h3>First Complex Number (z₁ = a + bi)</h3>
+  <label>Real part (a)</label>
+  <input type="number" id="a" value="0">
+  <label>Imaginary part (b)</label>
+  <input type="number" id="b" value="0">
+</div>
+
+<div class="box">
+  <h3>Second Complex Number (z₂ = c + di)</h3>
+  <label>Real part (c)</label>
+  <input type="number" id="c" value="0">
+  <label>Imaginary part (d)</label>
+  <input type="number" id="d" value="0">
+</div>
+
+<div class="box">
+  <label>Select Operation</label>
+  <select id="operation">
+    <option value="add">Addition</option>
+    <option value="sub">Subtraction</option>
+    <option value="mul">Multiplication</option>
+    <option value="div">Division</option>
+    <option value="mod">Modulus of z₁</option>
+  </select>
+
+  <button onclick="calculate()">Calculate</button>
+</div>
+
+<div class="box result" id="output">
+Result will appear here...
+</div>
+
+<script>
+function calculate() {
+  let a = parseFloat(document.getElementById("a").value);
+  let b = parseFloat(document.getElementById("b").value);
+  let c = parseFloat(document.getElementById("c").value);
+  let d = parseFloat(document.getElementById("d").value);
+  let op = document.getElementById("operation").value;
+
+  let out = "";
+
+  if (op === "add") {
+    out =
+`ADDITION
+
+Step 1: Add real parts
+${a} + ${c} = ${a + c}
+
+Step 2: Add imaginary parts
+${b}i + ${d}i = ${b + d}i
+
+Answer:
+${a + c} + ${b + d}i`;
+  }
+
+  else if (op === "sub") {
+    out =
+`SUBTRACTION
+
+Step 1: Subtract real parts
+${a} − ${c} = ${a - c}
+
+Step 2: Subtract imaginary parts
+${b}i − ${d}i = ${b - d}i
+
+Answer:
+${a - c} + ${b - d}i`;
+  }
+
+  else if (op === "mul") {
+    let real = a * c - b * d;
+    let imag = a * d + b * c;
+
+    out =
+`MULTIPLICATION
+
+Formula:
+(ac − bd) + (ad + bc)i
+
+Step 1:
+ac = ${a} × ${c} = ${a*c}
+bd = ${b} × ${d} = ${b*d}
+
+Real part = ${real}
+
+Step 2:
+ad = ${a} × ${d} = ${a*d}
+bc = ${b} × ${c} = ${b*c}
+
+Imaginary part = ${imag}i
+
+Answer:
+${real} + ${imag}i`;
+  }
+
+  else if (op === "div") {
+    let denom = c*c + d*d;
+    let real = (a*c + b*d) / denom;
+    let imag = (b*c - a*d) / denom;
+
+    out =
+`DIVISION
+
+Denominator:
+c² + d² = ${denom}
+
+Real part:
+(ac + bd) / (c² + d²) = ${real.toFixed(3)}
+
+Imaginary part:
+(bc − ad) / (c² + d²) = ${imag.toFixed(3)}i
+
+Answer:
+${real.toFixed(3)} + ${imag.toFixed(3)}i`;
+  }
+
+  else if (op === "mod") {
+    let mod = Math.sqrt(a*a + b*b);
+
+    out =
+`MODULUS
+
+Formula:
+|a + bi| = √(a² + b²)
+
+= √(${a*a} + ${b*b})
+= ${mod.toFixed(3)}`;
+  }
+
+  document.getElementById("output").textContent = out;
+}
+</script>
+
+</body>
+</html>

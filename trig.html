@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trigonometric Graph (Scaled Axes)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  padding: 12px;
+}
+
+canvas {
+  background: white;
+  display: block;
+  margin: 10px auto;
+  border-radius: 8px;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+}
+
+input, select {
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  background: #2f80ed;
+  color: white;
+}
+
+.info {
+  background: #1e222b;
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h3 style="text-align:center;">Trigonometric Graph</h3>
+
+<canvas id="graph" width="360" height="360"></canvas>
+
+<select id="func">
+  <option value="sin">y = sin x</option>
+  <option value="cos">y = cos x</option>
+  <option value="tan">y = tan x</option>
+  <option value="cot">y = cot x</option>
+  <option value="sec">y = sec x</option>
+  <option value="cosec">y = cosec x</option>
+</select>
+
+<input id="xStart" placeholder="Start x (e.g. -6.28)">
+<input id="xEnd" placeholder="End x (e.g. 6.28)">
+<input id="step" placeholder="Step (e.g. 0.01)">
+
+<button onclick="drawGraph()">Draw Graph</button>
+
+<div class="info">
+<b>Explanation:</b><br>
+• X-axis scale from Start to End value<br>
+• Y-axis scale from -1 to +1<br>
+• Uses radians (π ≈ 3.14)<br>
+• No zoom or pan
+</div>
+</div>
+
+<script>
+const canvas = document.getElementById("graph");
+const ctx = canvas.getContext("2d");
+
+function drawAxes(xMin, xMax) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const midX = canvas.width / 2;
+  const midY = canvas.height / 2;
+
+  // Draw axes
+  ctx.strokeStyle = "black";
+  ctx.beginPath();
+  ctx.moveTo(0, midY);
+  ctx.lineTo(canvas.width, midY);
+  ctx.moveTo(midX, 0);
+  ctx.lineTo(midX, canvas.height);
+  ctx.stroke();
+
+  ctx.fillStyle = "black";
+  ctx.font = "10px Arial";
+
+  // X-axis scale
+  const xStep = (xMax - xMin) / 6;
+  for (let i = 0; i <= 6; i++) {
+    let xVal = (xMin + i * xStep).toFixed(2);
+    let xPos = (i / 6) * canvas.width;
+    ctx.fillText(xVal, xPos, midY + 12);
+  }
+
+  // Y-axis scale
+  const yValues = [-1, -0.5, 0, 0.5, 1];
+  yValues.forEach(v => {
+    let yPos = midY - v * (canvas.height / 4);
+    ctx.fillText(v, midX + 4, yPos);
+  });
+}
+
+function drawGraph() {
+  const f = document.getElementById("func").value;
+  const xMin = Number(xStart.value);
+  const xMax = Number(xEnd.value);
+  const step = Number(stepInput.value);
+
+  drawAxes(xMin, xMax);
+
+  const scaleX = canvas.width / (xMax - xMin);
+  const scaleY = canvas.height / 4;
+
+  ctx.strokeStyle = "red";
+  ctx.beginPath();
+
+  let first = true;
+
+  for (let x = xMin; x <= xMax; x += step) {
+    let y = trig(f, x);
+    if (!isFinite(y)) {
+      first = true;
+      continue;
+    }
+
+    let px = (x - xMin) * scaleX;
+    let py = canvas.height / 2 - y * scaleY;
+
+    if (first) {
+      ctx.moveTo(px, py);
+      first = false;
+    } else {
+      ctx.lineTo(px, py);
+    }
+  }
+
+  ctx.stroke();
+}
+
+function trig(type, x) {
+  switch(type) {
+    case "sin": return Math.sin(x);
+    case "cos": return Math.cos(x);
+    case "tan": return Math.tan(x);
+    case "cot": return 1 / Math.tan(x);
+    case "sec": return 1 / Math.cos(x);
+    case "cosec": return 1 / Math.sin(x);
+  }
+}
+
+const stepInput = document.getElementById("step");
+</script>
+
+</body>
+</html>

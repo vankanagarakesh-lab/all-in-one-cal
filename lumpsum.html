@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lumpsum Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui,Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:#15181e;
+  color:white;
+  padding:16px;
+  overflow:auto;
+}
+
+h2{
+  text-align:center;
+  font-weight:500;
+  opacity:0.9;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  font-size:18px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  background:#1e222b;
+  color:white;
+}
+
+button{
+  width:100%;
+  margin-top:14px;
+  padding:14px;
+  font-size:18px;
+  border-radius:10px;
+  border:none;
+  background:#2f80ed;
+  color:white;
+}
+
+button:active{transform:scale(0.97);}
+
+.result{
+  margin-top:16px;
+  font-size:18px;
+  text-align:center;
+}
+
+.explain{
+  margin-top:14px;
+  background:#1e222b;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+canvas{
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>Lumpsum Calculator</h2>
+
+  <input id="amount" placeholder="Investment Amount (₹)">
+  <input id="rate" placeholder="Expected Return % (per year)">
+  <input id="years" placeholder="Time Period (years)">
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div id="result" class="result"></div>
+  <div id="explain" class="explain"></div>
+
+  <canvas id="chart" width="300" height="300"></canvas>
+</div>
+
+<script>
+function calculate(){
+  const P = Number(document.getElementById("amount").value);
+  const R = Number(document.getElementById("rate").value);
+  const T = Number(document.getElementById("years").value);
+
+  if(!P || !R || !T){
+    alert("Enter all values");
+    return;
+  }
+
+  // Formula: A = P (1 + R/100)^T
+  const A = P * Math.pow((1 + R/100), T);
+  const profit = A - P;
+
+  document.getElementById("result").innerHTML = `
+    <b>Total Value:</b> ₹${A.toFixed(2)}<br>
+    <b>Profit Earned:</b> ₹${profit.toFixed(2)}
+  `;
+
+  document.getElementById("explain").innerHTML = `
+<b>Step-by-Step Explanation:</b><br><br>
+
+<b>Step 1:</b> Investment Amount = ₹${P}<br>
+<b>Step 2:</b> Annual Return = ${R}%<br>
+<b>Step 3:</b> Time = ${T} years<br><br>
+
+<b>Formula Used:</b><br>
+A = P × (1 + R/100)<sup>T</sup><br><br>
+
+<b>Substitution:</b><br>
+A = ${P} × (1 + ${R}/100)<sup>${T}</sup><br><br>
+
+<b>Final Value:</b> ₹${A.toFixed(2)}<br>
+<b>Profit:</b> ₹${profit.toFixed(2)}
+  `;
+
+  drawChart(P, profit);
+}
+
+function drawChart(invested, profit){
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const total = invested + profit;
+  const investAngle = (invested / total) * 2 * Math.PI;
+
+  // Invested part
+  ctx.beginPath();
+  ctx.moveTo(150,150);
+  ctx.fillStyle = "#2f80ed";
+  ctx.arc(150,150,120,0,investAngle);
+  ctx.fill();
+
+  // Profit part
+  ctx.beginPath();
+  ctx.moveTo(150,150);
+  ctx.fillStyle = "#27ae60";
+  ctx.arc(150,150,120,investAngle,2*Math.PI);
+  ctx.fill();
+
+  // Labels
+  ctx.fillStyle="white";
+  ctx.font="14px Arial";
+  ctx.fillText("Invested",20,20);
+  ctx.fillStyle="#2f80ed";
+  ctx.fillRect(100,10,12,12);
+
+  ctx.fillStyle="white";
+  ctx.fillText("Returns",20,40);
+  ctx.fillStyle="#27ae60";
+  ctx.fillRect(100,30,12,12);
+}
+</script>
+
+</body>
+</html>

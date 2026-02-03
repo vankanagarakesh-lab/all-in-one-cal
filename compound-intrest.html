@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Compound Interest Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui, Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:#15181e;
+  color:white;
+  padding:16px;
+  overflow-y:auto;
+}
+
+h2{
+  text-align:center;
+  opacity:0.9;
+}
+
+label{
+  font-size:14px;
+  opacity:0.8;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:6px 0 14px;
+  font-size:18px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  background:#1e222b;
+  color:white;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  background:#2f80ed;
+  color:white;
+}
+
+button:active{
+  transform:scale(0.97);
+}
+
+.result{
+  margin-top:16px;
+  font-size:20px;
+  text-align:center;
+}
+
+.chart-box{
+  margin-top:16px;
+}
+
+.explain{
+  margin-top:14px;
+  background:#1e222b;
+  padding:12px;
+  border-radius:10px;
+  font-size:14px;
+  line-height:1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h2>📊 Compound Interest Calculator</h2>
+
+<label>Principal Amount (₹)</label>
+<input id="principal" placeholder="Example: 10000">
+
+<label>Rate of Interest (%)</label>
+<input id="rate" placeholder="Example: 10">
+
+<label>Time (Years)</label>
+<input id="time" placeholder="Example: 5">
+
+<button onclick="calculateCI()">Calculate</button>
+
+<div id="result" class="result"></div>
+
+<div class="chart-box">
+  <canvas id="ciChart"></canvas>
+</div>
+
+<div id="explain" class="explain"></div>
+</div>
+
+<script>
+let chart;
+
+function calculateCI(){
+  let P = Number(document.getElementById("principal").value);
+  let R = Number(document.getElementById("rate").value);
+  let T = Number(document.getElementById("time").value);
+
+  if(P<=0 || R<=0 || T<=0){
+    alert("Please enter valid values");
+    return;
+  }
+
+  let A = P * Math.pow(1 + R/100, T);
+  let interest = A - P;
+
+  document.getElementById("result").innerHTML = `
+    💰 Final Amount = ₹${A.toFixed(0)}<br>
+    📈 Interest Earned = ₹${interest.toFixed(0)}
+  `;
+
+  // PIE CHART
+  if(chart) chart.destroy();
+  chart = new Chart(document.getElementById("ciChart"), {
+    type: "pie",
+    data: {
+      labels: ["Principal", "Interest"],
+      datasets: [{
+        data: [P, interest],
+        backgroundColor: ["#27ae60", "#2f80ed"]
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: "white" }
+        }
+      }
+    }
+  });
+
+  document.getElementById("explain").innerHTML = `
+<b>👶 Step-by-Step Explanation (Very Easy):</b><br><br>
+
+1️⃣ You start with ₹<b>${P}</b><br>
+2️⃣ Interest rate is <b>${R}%</b> per year<br>
+3️⃣ Time is <b>${T} years</b><br><br>
+
+4️⃣ Every year, interest is added to your money<br>
+5️⃣ Next year, interest comes on <b>interest also</b><br><br>
+
+6️⃣ Final amount after ${T} years = ₹<b>${A.toFixed(0)}</b><br>
+7️⃣ Extra money earned = ₹<b>${interest.toFixed(0)}</b><br><br>
+
+🟢 Green part = your money<br>
+🔵 Blue part = interest gained 🎉
+`;
+}
+</script>
+
+</body>
+</html>

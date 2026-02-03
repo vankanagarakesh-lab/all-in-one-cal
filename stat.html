@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simple Statistics Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+}
+
+.app {
+  width: 100%;
+  max-width: 360px;
+  background: #15181e;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+h2 {
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #1e222b;
+  color: white;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+button {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.clear {
+  background: #ff7675;
+  color: black;
+}
+
+.result {
+  margin-top: 14px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.steps {
+  margin-top: 10px;
+  font-size: 14px;
+  background: #1e222b;
+  padding: 10px;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>Statistics Calculator</h2>
+
+  <input id="data" placeholder="Enter numbers like: 2,4,6">
+
+  <div class="buttons">
+    <button onclick="mean()">Mean</button>
+    <button onclick="variance()">Variance</button>
+    <button onclick="stddev()">Std Dev</button>
+    <button class="clear" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div id="result" class="result"></div>
+  <div id="steps" class="steps"></div>
+</div>
+
+<script>
+function getNumbers() {
+  return document.getElementById("data").value
+    .split(",")
+    .map(Number);
+}
+
+/* MEAN */
+function mean() {
+  let nums = getNumbers();
+  let sum = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    sum += nums[i];
+  }
+
+  let avg = sum / nums.length;
+
+  show(
+    avg,
+    `Step 1: Add all numbers = ${sum}<br>
+     Step 2: Count numbers = ${nums.length}<br>
+     Step 3: Divide = ${sum} ÷ ${nums.length}`
+  );
+}
+
+/* VARIANCE */
+function variance() {
+  let nums = getNumbers();
+  let sum = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    sum += nums[i];
+  }
+
+  let mean = sum / nums.length;
+  let diffSum = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    diffSum += (nums[i] - mean) ** 2;
+  }
+
+  let varr = diffSum / nums.length;
+
+  show(
+    varr,
+    `Step 1: Mean = ${mean}<br>
+     Step 2: Subtract mean from each number<br>
+     Step 3: Square each result<br>
+     Step 4: Add them = ${diffSum}<br>
+     Step 5: Divide by ${nums.length}`
+  );
+}
+
+/* STANDARD DEVIATION */
+function stddev() {
+  let nums = getNumbers();
+  let sum = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    sum += nums[i];
+  }
+
+  let mean = sum / nums.length;
+  let diffSum = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    diffSum += (nums[i] - mean) ** 2;
+  }
+
+  let variance = diffSum / nums.length;
+  let std = Math.sqrt(variance);
+
+  show(
+    std,
+    `Step 1: Mean = ${mean}<br>
+     Step 2: Variance = ${variance}<br>
+     Step 3: Square root of variance`
+  );
+}
+
+/* SHOW RESULT */
+function show(answer, explanation) {
+  document.getElementById("result").innerHTML =
+    "Answer = " + answer.toFixed(4);
+
+  document.getElementById("steps").innerHTML =
+    "<b>Explanation:</b><br>" + explanation;
+}
+
+/* CLEAR */
+function clearAll() {
+  document.getElementById("data").value = "";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("steps").innerHTML = "";
+}
+</script>
+
+</body>
+</html>

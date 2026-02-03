@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Calculator Menu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:system-ui, Arial, sans-serif;
+}
+
+/* IMPORTANT FIX */
+html, body{
+  margin:0;
+  padding:0;
+  height:100%;
+  background:#0f1115;
+  color:white;
+}
+
+/* MENU WRAPPER */
+.menu{
+  min-height:100vh;        /* 👈 covers full screen */
+  padding:16px;
+  overflow-y:auto;         /* 👈 scroll if content is more */
+}
+
+.menu h3{
+  margin:18px 0 10px;
+  font-size:14px;
+  opacity:0.6;
+}
+
+.menu button{
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  background:#1e222b;
+  border:none;
+  color:white;
+  border-radius:8px;
+  font-size:15px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.menu button:active{
+  transform:scale(0.97);
+}
+</style>
+</head>
+
+<body>
+
+<div class="menu">
+
+  <h3>🔢LIST OF CALCULATORS</h3>
+  <button onclick="location.href='index.html'">Basic Calculator</button>
+   <button onclick="location.href='graphs.html'">Basic Graphs</button>
+   <button onclick="location.href='trig.html'">Trigonometric Graphs</button>
+   <button onclick="location.href='loggraph.html'">Log & ex Graphs</button>
+   <button onclick="location.href='Algebraic-graphs.html'">Algebraic-graphs</button>
+   <button onclick="location.href='geo-graphs.html'">Geometric_graphs</button>
+   <button onclick="location.href='3d.html'">3D-graphs</button>
+   <button onclick="location.href='pro-graphs.html'">Probability-graphs</button>
+  <button onclick="location.href='power-root.html'">Power & Root</button>
+  <button onclick="location.href='tigonametric.html'">Trigonometry</button>
+  <button onclick="location.href='logfun.html'">LOG FUN</button>
+  <button onclick="location.href='stat.html'">statistic</button>
+  <button onclick="location.href='sgpa-cgpa.html'">SGPA-CGPA</button>
+   <button onclick="location.href='bin.html'">Conversions</button>
+   <button onclick="location.href='complex.html'">Complex-numbers</button>
+   <button onclick="location.href='matrix.html'">Matrix</button>
+   <button onclick="location.href='vector.html'">Vectors</button>
+   <button onclick="location.href='oparetors.html'">Operators</button>
+  <h3>💰 Finance</h3>
+  <button onclick="location.href='simple-intrest.html'">Simple Interest</button>
+  <button onclick="location.href='compound-intrest.html'">Compound Interest</button>
+  <button onclick="location.href='emi.html'">EMI</button>
+  <button onclick="location.href='lumpsum.html'">Lumpsum</button>
+  <button onclick="location.href='sip.html'">SIP</button>
+  <button onclick="location.href='fixed-deposite.html'">fixed-deposite</button>
+  <button onclick="location.href='rd_ppf.html'">RD and PPF</button>
+  <button onclick="selectCalc('GST Calculator')">GST</button>
+
+  <h3>📐 Geometry</h3>
+  <button onclick="selectCalc('Area Calculator')">Area</button>
+  <button onclick="selectCalc('Volume Calculator')">Volume</button>
+
+  <h3>🔁 Conversion</h3>
+  <button onclick="selectCalc('Length Converter')">Length</button>
+  <button onclick="selectCalc('Weight Converter')">Weight</button>
+  <button onclick="selectCalc('Temperature Converter')">Temperature</button>
+
+</div>
+
+<script>
+function selectCalc(name){
+  parent.postMessage(name, "*");
+}
+
+</script>
+
+</body>
+</html>
