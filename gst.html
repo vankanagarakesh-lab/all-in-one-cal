@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GST Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui,Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:#15181e;
+  color:white;
+  padding:16px;
+  overflow-y:auto;
+}
+
+h2{
+  text-align:center;
+  font-weight:500;
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  background:#1e222b;
+  color:white;
+}
+
+.buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+
+button{
+  padding:12px;
+  font-size:15px;
+  border-radius:8px;
+  border:none;
+  background:#2f80ed;
+  color:white;
+}
+
+button:active{transform:scale(0.96)}
+
+.result{
+  margin-top:14px;
+  font-size:18px;
+  text-align:center;
+}
+
+.explain{
+  margin-top:10px;
+  background:#1e222b;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.clear{
+  background:#ff7675;
+  color:black;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h2>GST Calculator</h2>
+
+<input id="amount" placeholder="Enter Amount ₹">
+
+<select id="gstRate">
+  <option value="5">5%</option>
+  <option value="12">12%</option>
+  <option value="18" selected>18%</option>
+  <option value="28">28%</option>
+</select>
+
+<select id="gstType">
+  <option value="cgst">CGST + SGST</option>
+  <option value="igst">IGST</option>
+</select>
+
+<div class="buttons">
+  <button onclick="addGST()">Add GST</button>
+  <button onclick="removeGST()">Remove GST</button>
+  <button class="clear" onclick="clearAll()">Clear</button>
+</div>
+
+<div id="result" class="result"></div>
+<div id="explain" class="explain"></div>
+</div>
+
+<script>
+function addGST(){
+  let amount = Number(document.getElementById("amount").value);
+  let rate = Number(document.getElementById("gstRate").value);
+  let type = document.getElementById("gstType").value;
+
+  let gst = amount * rate / 100;
+  let total = amount + gst;
+
+  let text = `
+<b>Step-by-Step:</b><br>
+1️⃣ Original Price = ₹${amount}<br>
+2️⃣ GST Rate = ${rate}%<br>
+3️⃣ GST Amount = ${amount} × ${rate} ÷ 100 = ₹${gst.toFixed(2)}<br>
+4️⃣ Final Price = ₹${amount} + ₹${gst.toFixed(2)} = ₹${total.toFixed(2)}<br>
+`;
+
+  if(type === "cgst"){
+    text += `
+5️⃣ CGST = ₹${(gst/2).toFixed(2)}<br>
+6️⃣ SGST = ₹${(gst/2).toFixed(2)}
+`;
+  }else{
+    text += `5️⃣ IGST = ₹${gst.toFixed(2)}`;
+  }
+
+  document.getElementById("result").innerHTML =
+    `<b>Total Amount = ₹${total.toFixed(2)}</b>`;
+  document.getElementById("explain").innerHTML = text;
+}
+
+function removeGST(){
+  let total = Number(document.getElementById("amount").value);
+  let rate = Number(document.getElementById("gstRate").value);
+
+  let base = total * 100 / (100 + rate);
+  let gst = total - base;
+
+  let text = `
+<b>Step-by-Step:</b><br>
+1️⃣ Final Amount = ₹${total}<br>
+2️⃣ GST Rate = ${rate}%<br>
+3️⃣ Original Price = ${total} × 100 ÷ (100 + ${rate}) = ₹${base.toFixed(2)}<br>
+4️⃣ GST Amount = ₹${gst.toFixed(2)}
+`;
+
+  document.getElementById("result").innerHTML =
+    `<b>Original Amount = ₹${base.toFixed(2)}</b>`;
+  document.getElementById("explain").innerHTML = text;
+}
+
+function clearAll(){
+  document.getElementById("amount").value="";
+  document.getElementById("result").innerHTML="";
+  document.getElementById("explain").innerHTML="";
+}
+</script>
+
+</body>
+</html>

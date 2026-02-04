@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Advanced Physics 3D Graphs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+:root { --bg: #0f1115; --text: white; --input: #1e2227; }
+body.light-mode { --bg: #ffffff; --text: #1a1a1a; --input: #f0f0f0; }
+
+body{ margin:0; font-family:Arial; background: var(--bg); color: var(--text); text-align:center; transition: 0.3s; }
+select,input,button{ width:92%; max-width:360px; padding:10px; margin:6px; font-size:14px; background: var(--input); color: var(--text); border:1px solid #444; border-radius:4px; }
+#graph{ width:100%; height:500px; }
+.note{ font-size:12px; opacity:0.8; margin:5px;}
+.formula{ color:#7dd3fc; font-size:13px; font-weight:bold; margin-bottom:10px; height:20px;}
+.theme-btn { background: #3b82f6; color: white; cursor: pointer; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h2>🔬 Physics – Complete 3D Visualization</h2>
+
+<button class="theme-btn" onclick="toggleTheme()">Toggle White/Black Background</button>
+<p class="note">Select a topic, adjust values, and click Draw.</p>
+
+<select id="graphType" onchange="updateUI()">
+  <optgroup label="1. MECHANICS">
+    <option value="posTime">Position–Time–Space Surface (x,y,t)</option>
+    <option value="velField">Velocity Field Surface</option>
+    <option value="accelField">Acceleration Field Surface</option>
+    <option value="projSurf">Projectile Motion Surface</option>
+    <option value="trajectory">Trajectory in 3D Space</option>
+    <option value="potential">Potential Energy Surface</option>
+    <option value="kinetic">Kinetic Energy Distribution</option>
+    <option value="forceField">Force Field Surface</option>
+    <option value="gravField">Gravitational Field Surface</option>
+    <option value="equiGrav">Equipotential Surfaces (Gravity)</option>
+  </optgroup>
+  <optgroup label="2. WAVES & OSCILLATIONS">
+    <option value="travelWave">Travelling Wave Surface</option>
+    <option value="standingWave">Standing Wave Surface</option>
+    <option value="soundInt">3D Sound Wave Intensity</option>
+    <option value="ripple">Ripple Tank Wave Surface</option>
+    <option value="superposition">Superposition of Waves (3D)</option>
+  </optgroup>
+  <optgroup label="3. ELECTRICITY & MAGNETISM">
+    <option value="elecDist">Electric Field Distribution</option>
+    <option value="elecPot">Electric Potential Surface</option>
+    <option value="equiElec">Equipotential Surfaces (Electric)</option>
+    <option value="pointCharge">Field around Point Charge</option>
+    <option value="dipole">Field around Electric Dipole</option>
+    <option value="magDist">Magnetic Field Distribution</option>
+    <option value="magLines">Magnetic Field Lines Surface</option>
+    <option value="wireField">Field around Current-Carrying Wire</option>
+    <option value="solenoid">Field around Solenoid</option>
+    <option value="emWave">Electromagnetic Wave Surface</option>
+  </optgroup>
+  <optgroup label="4. THERMODYNAMICS">
+    <option value="pvt">PV–T Surface (Ideal Gas)</option>
+    <option value="isothermal">Isothermal Surface</option>
+    <option value="adiabatic">Adiabatic Surface</option>
+    <option value="entropy">Entropy Surface</option>
+    <option value="enthalpy">Enthalpy Surface</option>
+    <option value="intEnergy">Internal Energy Surface</option>
+  </optgroup>
+  <optgroup label="5. OPTICS">
+    <option value="lightInt">Light Intensity Distribution</option>
+    <option value="diffraction">Diffraction Pattern Surface</option>
+    <option value="interference">Interference Fringe Surface</option>
+    <option value="rayTrace">3D Ray Tracing Surface</option>
+    <option value="wavefront">Wavefront Surface</option>
+  </optgroup>
+  <optgroup label="6. MODERN PHYSICS / QUANTUM">
+    <option value="waveFunc">Wave Function Surface (ψ)</option>
+    <option value="probDensity">Probability Density Surface (ψ²)</option>
+    <option value="potWell">Potential Well Surface</option>
+    <option value="energyLevel">Energy Level Surfaces</option>
+    <option value="electronCloud">Electron Cloud Density</option>
+    <option value="bandStructure">Band Structure Surface</option>
+  </optgroup>
+  <optgroup label="7. FLUID MECHANICS">
+    <option value="fluidVel">Velocity Field in Fluids</option>
+    <option value="pressureDist">Pressure Distribution Surface</option>
+    <option value="streamline">Streamline Surface</option>
+    <option value="flowPot">Flow Potential Surface</option>
+    <option value="turbulence">Turbulence Intensity Surface</option>
+  </optgroup>
+</select>
+
+<div id="formula" class="formula"></div>
+<input id="p1"> <input id="p2"> <input id="p3">
+<button onclick="draw()">Draw Graph</button>
+<div id="graph"></div>
+
+<script>
+let isLightMode = false;
+function toggleTheme() {
+    isLightMode = !isLightMode;
+    document.body.classList.toggle('light-mode');
+    draw(); // Redraw to update graph colors
+}
+
+function range(a,b,s){ let arr=[]; for(let i=a;i<=b;i+=s) arr.push(i); return arr; }
+
+function updateUI(){
+    const g = graphType.value;
+    const f = document.getElementById("formula");
+    const configs = {
+        posTime: ["x = f(y,t)", "Speed Scale", "Time Factor", "unused"],
+        velField: ["V = grad(Φ)", "Mag", "Field Strength", "unused"],
+        accelField: ["a = dV/dt", "Constant", "unused", "unused"],
+        projSurf: ["z = f(x,y,t)", "Velocity", "Gravity", "Angle"],
+        trajectory: ["3D Path", "Velocity", "Angle", "unused"],
+        potential: ["U = k(x²+y²)", "k Constant", "Scale", "unused"],
+        kinetic: ["K = ½mv²", "Mass", "Velocity scale", "unused"],
+        forceField: ["F = -dU/dr", "Strength", "unused", "unused"],
+        gravField: ["V = -GM/r", "Mass", "Softening", "unused"],
+        equiGrav: ["V(r) = C", "Level", "unused", "unused"],
+        travelWave: ["z = A sin(kx - wt)", "Amplitude", "k (Wave#)", "w (Freq)"],
+        standingWave: ["z = A sin(kx)cos(ky)", "Amplitude", "k", "unused"],
+        soundInt: ["I = P/(4πr²)", "Power", "unused", "unused"],
+        ripple: ["z = A sin(r)/r", "Amplitude", "Freq", "unused"],
+        superposition: ["z = ΣA sin(kr)", "A1", "A2", "Spacing"],
+        elecDist: ["E-Field Dist", "Charge", "unused", "unused"],
+        elecPot: ["V = kq/r", "Charge", "Softening", "unused"],
+        equiElec: ["V=const", "Voltage", "unused", "unused"],
+        pointCharge: ["1/r² Field", "Charge", "unused", "unused"],
+        dipole: ["V1 - V2", "Charge", "Separation", "unused"],
+        magDist: ["B Field", "Current", "unused", "unused"],
+        magLines: ["B Vector Map", "Strength", "unused", "unused"],
+        wireField: ["B = μI/2πr", "Current", "unused", "unused"],
+        solenoid: ["B = μnI", "Turns", "Current", "unused"],
+        emWave: ["E & B Orthogonal", "Amplitude", "k", "unused"],
+        pvt: ["P = nRT/V", "nR", "Temp Offset", "unused"],
+        isothermal: ["P ∝ 1/V", "Temp", "unused", "unused"],
+        adiabatic: ["P ∝ V^-γ", "Constant", "Gamma (1.4)", "unused"],
+        entropy: ["S = k ln W", "Scale", "unused", "unused"],
+        enthalpy: ["H = U + PV", "U Scale", "unused", "unused"],
+        intEnergy: ["U(T,V)", "Degree of Freedom", "unused", "unused"],
+        lightInt: ["I = cos²θ", "Brightness", "unused", "unused"],
+        diffraction: ["Sinc²(x)", "A", "Slit Width", "unused"],
+        interference: ["4I₀cos²δ", "A", "Spacing", "unused"],
+        rayTrace: ["Reflection/Refraction", "Index", "unused", "unused"],
+        wavefront: ["r = ct", "Time", "unused", "unused"],
+        waveFunc: ["ψ(x,y)", "Mode n", "Mode m", "unused"],
+        probDensity: ["|ψ|²", "Mode n", "Mode m", "unused"],
+        potWell: ["Infinite Well", "Width", "unused", "unused"],
+        energyLevel: ["E = n²h²/8mL²", "n", "unused", "unused"],
+        electronCloud: ["Prob Dist", "Orbit Scale", "unused", "unused"],
+        bandStructure: ["E(k)", "a (lattice)", "b", "unused"],
+        fluidVel: ["V(x,y)", "Flow Rate", "unused", "unused"],
+        pressureDist: ["Bernoulli P", "P₀", "Density", "unused"],
+        streamline: ["ψ = const", "Flow", "unused", "unused"],
+        flowPot: ["Φ Field", "Source", "unused", "unused"],
+        turbulence: ["Random Dist", "Intensity", "Scale", "unused"]
+    };
+    const cfg = configs[g];
+    f.innerHTML = "Formula: " + cfg[0];
+    p1.placeholder = cfg[1]; p2.placeholder = cfg[2]; p3.placeholder = cfg[3];
+}
+
+function draw(){
+    const type = graphType.value;
+    const a = Number(p1.value)||1, b = Number(p2.value)||1, c = Number(p3.value)||1;
+    const x = range(-5,5,0.25), y = range(-5,5,0.25);
+    let z = [];
+
+    if(type==="trajectory"){
+        let t = range(0,5,0.1);
+        Plotly.newPlot("graph", [{x:t.map(i=>a*i), y:t.map(i=>b*i), z:t.map(i=>a*i - 0.5*9.8*i*i), type:"scatter3d", mode:"lines"}], layout()); return;
+    }
+
+    z = y.map(Y => x.map(X => {
+        let r = Math.sqrt(X*X + Y*Y) + 0.01;
+        switch(type){
+            case "posTime": return a*X + b*Y;
+            case "velField": return a*Math.exp(-r/b);
+            case "accelField": return a;
+            case "projSurf": return a*X - 0.5*b*(X*X/a);
+            case "potential": return a*(X*X + Y*Y);
+            case "kinetic": return 0.5*a*(X*X + Y*Y);
+            case "forceField": return -a*r;
+            case "gravField": return -a/(r+b);
+            case "equiGrav": return Math.floor(-a/r * 5);
+            case "travelWave": return a*Math.sin(b*X - c);
+            case "standingWave": return a*Math.sin(b*X)*Math.cos(b*Y);
+            case "soundInt": return a/(r*r);
+            case "ripple": return a*Math.sin(b*r)/r;
+            case "superposition": return a*Math.sin(X)+b*Math.sin(Y+c);
+            case "elecDist": return a/(r*r);
+            case "elecPot": return a/(r+b);
+            case "equiElec": return Math.round(a/r);
+            case "pointCharge": return a/(r*r);
+            case "dipole": return (a/Math.sqrt((X-b)**2+Y**2+0.1)) - (a/Math.sqrt((X+b)**2+Y**2+0.1));
+            case "magDist": return a/r;
+            case "magLines": return Math.sin(a*r);
+            case "wireField": return a/r;
+            case "solenoid": return a*b;
+            case "emWave": return a*Math.sin(b*X);
+            case "pvt": return (a*(Y+6))/(X+6);
+            case "isothermal": return a/(X+6);
+            case "adiabatic": return a/Math.pow(X+6, b);
+            case "entropy": return a*Math.log(r);
+            case "enthalpy": return a*X + b*Y;
+            case "intEnergy": return a*(Y+6);
+            case "lightInt": return a*Math.pow(Math.cos(r/5), 2);
+            case "diffraction": return a*Math.pow(Math.sin(b*X)/(b*X), 2);
+            case "interference": return a*Math.pow(Math.cos(b*X), 2);
+            case "rayTrace": return X > 0 ? X*a : X;
+            case "wavefront": return Math.sqrt(Math.abs(a*a - r*r));
+            case "waveFunc": return Math.sin(a*X)*Math.sin(b*Y);
+            case "probDensity": return Math.pow(Math.sin(a*X)*Math.sin(b*Y), 2);
+            case "potWell": return r < a ? 0 : 10;
+            case "energyLevel": return a*a;
+            case "electronCloud": return Math.exp(-r/a);
+            case "bandStructure": return Math.cos(a*X) + Math.cos(b*Y);
+            case "fluidVel": return a*Y;
+            case "pressureDist": return a - 0.5*b*r;
+            case "streamline": return a*X*Y;
+            case "flowPot": return a*Math.log(r);
+            case "turbulence": return a*Math.sin(X*b)+Math.random()*c;
+            default: return 0;
+        }
+    }));
+
+    Plotly.newPlot("graph", [{x:x, y:y, z:z, type:"surface", colorscale: isLightMode ? 'Jet' : 'Portland'}], layout());
+}
+
+function layout(){
+    const color = isLightMode ? "#ffffff" : "#0f1115";
+    const fontColor = isLightMode ? "#1a1a1a" : "white";
+    return { 
+        paper_bgcolor: color, plot_bgcolor: color, font:{color: fontColor},
+        margin:{l:0,r:0,t:0,b:0}, 
+        scene:{
+            xaxis:{title:"X", gridcolor: isLightMode ? "#ccc" : "#444"}, 
+            yaxis:{title:"Y", gridcolor: isLightMode ? "#ccc" : "#444"}, 
+            zaxis:{title:"Z", gridcolor: isLightMode ? "#ccc" : "#444"}
+        }
+    };
+}
+updateUI(); draw();
+</script>
+</body>
+</html>

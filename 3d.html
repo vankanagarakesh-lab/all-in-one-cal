@@ -2,9 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>3D Graph Calculator</title>
+<title>Maths 3D Graphs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 <style>
@@ -15,144 +14,200 @@ body{
   color:white;
   text-align:center;
 }
-input, select, button{
-  padding:10px;
-  font-size:16px;
+h2{margin:10px 0}
+select,input,button{
   width:90%;
   max-width:320px;
+  padding:10px;
   margin:6px;
+  font-size:16px;
+}
+.note{
+  font-size:14px;
+  opacity:0.85;
 }
 #graph{
   width:100%;
   height:420px;
-}
-.info{
-  font-size:14px;
-  opacity:0.85;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🧊 3D Graph Calculator</h2>
+<h2>📐 Mathematics – 3D Graphs</h2>
 
-<div class="info">
-Enter formula for <b>z = f(x,y)</b><br>
-Example: <code>sin(x)*cos(y)</code>
+<div class="note">
+Select graph → Enter values → Draw
 </div>
 
-<input id="formula" value="sin(x)*cos(y)">
-
-<select id="type">
-  <option value="surface">3D Surface</option>
-  <option value="scatter3d">3D Scatter</option>
-  <option value="mesh3d">3D Mesh</option>
-  <option value="line">3D Line</option>
-  <option value="contour">Contour (Top view)</option>
+<select id="graphType">
+  <option value="plane">Plane (Ax+By+Cz+D=0)</option>
+  <option value="hplane">Horizontal Plane (z=c)</option>
+  <option value="vplane">Vertical Plane (x=c)</option>
+  <option value="ellipPara">Elliptic Paraboloid</option>
+  <option value="hyperPara">Hyperbolic Paraboloid</option>
+  <option value="cone">Right Circular Cone</option>
+  <option value="doubleCone">Double Cone</option>
+  <option value="sphere">Sphere</option>
+  <option value="ellipsoid">Ellipsoid</option>
+  <option value="cylinder">Circular Cylinder</option>
+  <option value="ellipCyl">Elliptic Cylinder</option>
+  <option value="paraCyl">Parabolic Cylinder</option>
+  <option value="hyperCyl">Hyperbolic Cylinder</option>
+  <option value="hyper1">Hyperboloid (One Sheet)</option>
+  <option value="hyper2">Hyperboloid (Two Sheets)</option>
+  <option value="line3d">Line in 3D</option>
+  <option value="helix">Helix</option>
+  <option value="spiral">Spiral Curve</option>
+  <option value="torus">Torus</option>
 </select>
+
+<input id="p1" placeholder="Value 1 (example: 2)">
+<input id="p2" placeholder="Value 2 (example: 3)">
+<input id="p3" placeholder="Value 3 (example: 4)">
 
 <button onclick="draw()">Draw Graph</button>
 
 <div id="graph"></div>
 
-<p class="info">
-🖱 Drag mouse → rotate  
-🔍 Scroll → zoom  
+<p class="note">
+🖱 Drag = Rotate | 🔍 Scroll = Zoom
 </p>
 
 <script>
+function range(a,b,s){
+  let r=[];
+  for(let i=a;i<=b;i+=s) r.push(i);
+  return r;
+}
+
 function draw(){
-  let expr = document.getElementById("formula").value;
-  let type = document.getElementById("type").value;
+  let t = graphType.value;
+  let a = Number(p1.value)||1;
+  let b = Number(p2.value)||1;
+  let c = Number(p3.value)||1;
 
-  let x = [], y = [], z = [];
+  let x = range(-6,6,0.3);
+  let y = range(-6,6,0.3);
+  let z=[];
 
-  for(let i=-5;i<=5;i+=0.5){
-    let row=[];
-    let rowy=[];
-    for(let j=-5;j<=5;j+=0.5){
-      try{
-        let val = Function("x","y",
-          "return " + expr
-            .replace(/sin/g,"Math.sin")
-            .replace(/cos/g,"Math.cos")
-            .replace(/tan/g,"Math.tan")
-            .replace(/sqrt/g,"Math.sqrt")
-        )(i,j);
-
-        row.push(val);
-        rowy.push(j);
-      }catch{
-        alert("Invalid formula");
-        return;
-      }
-    }
-    z.push(row);
-    x.push(rowy);
-    y.push(Array(row.length).fill(i));
+  if(t==="plane"){
+    z = y.map(Y=>x.map(X=>(-a*X-b*Y-c)/1));
+  }
+  if(t==="hplane"){
+    z = y.map(Y=>x.map(X=>a));
+  }
+  if(t==="vplane"){
+    z = y.map(Y=>x.map(X=>X===a?0:null));
+  }
+  if(t==="ellipPara"){
+    z = y.map(Y=>x.map(X=>X*X+Y*Y));
+  }
+  if(t==="hyperPara"){
+    z = y.map(Y=>x.map(X=>X*X-Y*Y));
+  }
+  if(t==="cone"){
+    z = y.map(Y=>x.map(X=>Math.sqrt(X*X+Y*Y)));
+  }
+  if(t==="doubleCone"){
+    z = y.map(Y=>x.map(X=>Math.sqrt(X*X+Y*Y)));
+  }
+  if(t==="sphere"){
+    z = y.map(Y=>x.map(X=>{
+      let v=a*a-X*X-Y*Y;
+      return v>0?Math.sqrt(v):null;
+    }));
+  }
+  if(t==="ellipsoid"){
+    z = y.map(Y=>x.map(X=>{
+      let v=1-(X*X)/(a*a)-(Y*Y)/(b*b);
+      return v>0?c*Math.sqrt(v):null;
+    }));
+  }
+  if(t==="cylinder"){
+    z = y.map(Y=>x.map(X=>X*X+Y*Y<=a*a?Y:null));
+  }
+  if(t==="ellipCyl"){
+    z = y.map(Y=>x.map(X=>(X*X)/(a*a)+(Y*Y)/(b*b)<=1?Y:null));
+  }
+  if(t==="paraCyl"){
+    z = y.map(Y=>x.map(X=>X*X));
+  }
+  if(t==="hyperCyl"){
+    z = y.map(Y=>x.map(X=>X*X-Y*Y));
+  }
+  if(t==="hyper1"){
+    z = y.map(Y=>x.map(X=>Math.sqrt(X*X+Y*Y-1)));
+  }
+  if(t==="hyper2"){
+    z = y.map(Y=>x.map(X=>Math.sqrt(1+X*X+Y*Y)));
   }
 
-  let data;
-
-  if(type==="surface"){
-    data=[{z:z, type:"surface"}];
-  }
-  else if(type==="contour"){
-    data=[{z:z, type:"contour"}];
-  }
-  else if(type==="scatter3d"){
-    let xs=[],ys=[],zs=[];
-    for(let i=0;i<z.length;i++){
-      for(let j=0;j<z[i].length;j++){
-        xs.push(i);
-        ys.push(j);
-        zs.push(z[i][j]);
-      }
-    }
-    data=[{
-      x:xs,y:ys,z:zs,
-      mode:"markers",
+  if(t==="line3d"){
+    let tval=range(-5,5,0.1);
+    Plotly.newPlot("graph",[{
+      x:tval.map(v=>a*v),
+      y:tval.map(v=>b*v),
+      z:tval.map(v=>c*v),
+      mode:"lines",
       type:"scatter3d"
-    }];
-  }
-  else if(type==="mesh3d"){
-    let xs=[],ys=[],zs=[];
-    for(let i=0;i<z.length;i++){
-      for(let j=0;j<z[i].length;j++){
-        xs.push(i);
-        ys.push(j);
-        zs.push(z[i][j]);
-      }
-    }
-    data=[{x:xs,y:ys,z:zs,type:"mesh3d"}];
-  }
-  else if(type==="line"){
-    let xs=[],ys=[],zs=[];
-    for(let i=0;i<z.length;i++){
-      xs.push(i);
-      ys.push(i);
-      zs.push(z[i][i]);
-    }
-    data=[{
-      x:xs,y:ys,z:zs,
-      type:"scatter3d",
-      mode:"lines"
-    }];
+    }]);
+    return;
   }
 
-  Plotly.newPlot("graph", data, {
+  if(t==="helix"){
+    let tval=range(0,10,0.1);
+    Plotly.newPlot("graph",[{
+      x:tval.map(v=>Math.cos(v)),
+      y:tval.map(v=>Math.sin(v)),
+      z:tval,
+      mode:"lines",
+      type:"scatter3d"
+    }]);
+    return;
+  }
+
+  if(t==="spiral"){
+    let tval=range(0,10,0.1);
+    Plotly.newPlot("graph",[{
+      x:tval.map(v=>v*Math.cos(v)),
+      y:tval.map(v=>v*Math.sin(v)),
+      z:tval,
+      mode:"lines",
+      type:"scatter3d"
+    }]);
+    return;
+  }
+
+  if(t==="torus"){
+    let u=range(0,6.28,0.3);
+    let v=range(0,6.28,0.3);
+    z=[];
+    let X=[],Y=[];
+    for(let i=0;i<u.length;i++){
+      let zr=[],xr=[],yr=[];
+      for(let j=0;j<v.length;j++){
+        xr.push((a+b*Math.cos(v[j]))*Math.cos(u[i]));
+        yr.push((a+b*Math.cos(v[j]))*Math.sin(u[i]));
+        zr.push(b*Math.sin(v[j]));
+      }
+      X.push(xr); Y.push(yr); z.push(zr);
+    }
+    Plotly.newPlot("graph",[{
+      x:X,y:Y,z:z,type:"surface"
+    }]);
+    return;
+  }
+
+  Plotly.newPlot("graph",[{
+    x:x,y:y,z:z,type:"surface"
+  }],{
     paper_bgcolor:"#0f1115",
     plot_bgcolor:"#0f1115",
-    font:{color:"white"},
-    scene:{
-      xaxis:{title:"X"},
-      yaxis:{title:"Y"},
-      zaxis:{title:"Z"}
-    }
+    font:{color:"white"}
   });
 }
-draw();
 </script>
 
 </body>

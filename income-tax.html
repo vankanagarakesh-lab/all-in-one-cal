@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Income Tax Calculator (India)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f1115;
+  font-family:system-ui, Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.app{
+  width:100%;
+  max-width:420px;
+  background:#15181e;
+  color:white;
+  padding:16px;
+  height:100vh;
+  overflow:auto;
+}
+h2{
+  text-align:center;
+  font-weight:500;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  background:#1e222b;
+  color:white;
+}
+button{
+  width:100%;
+  padding:14px;
+  margin-top:16px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  background:#2f80ed;
+  color:white;
+}
+button:active{
+  transform:scale(0.97);
+}
+.result{
+  margin-top:16px;
+  font-size:20px;
+  text-align:center;
+}
+.explain{
+  margin-top:12px;
+  background:#1e222b;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.7;
+}
+.clear{
+  background:#ff7675;
+  color:black;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<h2>Income Tax Calculator 🇮🇳</h2>
+
+<input type="number" id="income" placeholder="Enter yearly income (₹)">
+
+<select id="regime">
+  <option value="old">Old Tax Regime</option>
+  <option value="new">New Tax Regime</option>
+</select>
+
+<button onclick="calculateTax()">Calculate Tax</button>
+<button class="clear" onclick="clearAll()">Clear</button>
+
+<div id="result" class="result"></div>
+<div id="explain" class="explain"></div>
+</div>
+
+<script>
+function calculateTax(){
+  let income = Number(document.getElementById("income").value);
+  let regime = document.getElementById("regime").value;
+
+  if(income<=0){
+    alert("Enter valid income");
+    return;
+  }
+
+  let tax = 0;
+  let steps = "";
+
+  if(regime === "old"){
+    steps += "<b>Old Tax Regime Calculation:</b><br>";
+
+    if(income > 250000){
+      let slab = Math.min(income,500000) - 250000;
+      tax += slab * 0.05;
+      steps += "₹2.5L – ₹5L → 5% of ₹" + slab + " = ₹" + (slab*0.05) + "<br>";
+    }
+
+    if(income > 500000){
+      let slab = Math.min(income,1000000) - 500000;
+      tax += slab * 0.20;
+      steps += "₹5L – ₹10L → 20% of ₹" + slab + " = ₹" + (slab*0.20) + "<br>";
+    }
+
+    if(income > 1000000){
+      let slab = income - 1000000;
+      tax += slab * 0.30;
+      steps += "Above ₹10L → 30% of ₹" + slab + " = ₹" + (slab*0.30) + "<br>";
+    }
+
+  }else{
+    steps += "<b>New Tax Regime Calculation:</b><br>";
+
+    let slabs = [
+      [300000,0],
+      [300000,0.05],
+      [300000,0.10],
+      [300000,0.15],
+      [300000,0.20],
+      [Infinity,0.30]
+    ];
+
+    let remaining = income;
+    let start = 0;
+
+    for(let i=0;i<slabs.length;i++){
+      if(remaining<=0) break;
+      let slabAmount = Math.min(remaining, slabs[i][0]);
+      let slabTax = slabAmount * slabs[i][1];
+      tax += slabTax;
+
+      steps += "₹" + start + " – ₹" + (start+slabAmount) +
+               " → " + (slabs[i][1]*100) +
+               "% of ₹" + slabAmount +
+               " = ₹" + slabTax + "<br>";
+
+      remaining -= slabAmount;
+      start += slabAmount;
+    }
+  }
+
+  document.getElementById("result").innerHTML =
+    "Total Tax = ₹" + tax.toFixed(2);
+
+  document.getElementById("explain").innerHTML =
+    steps + "<br><b>Final Tax to Pay = ₹" + tax.toFixed(2) + "</b>";
+}
+
+function clearAll(){
+  document.getElementById("income").value="";
+  document.getElementById("result").innerHTML="";
+  document.getElementById("explain").innerHTML="";
+}
+</script>
+</body>
+</html>

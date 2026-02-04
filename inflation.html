@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inflation Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+h2 {
+  text-align: center;
+  opacity: 0.85;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.result {
+  margin-top: 16px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.explain {
+  margin-top: 14px;
+  font-size: 14px;
+  background: #1e222b;
+  padding: 12px;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+canvas {
+  margin-top: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>📉 Inflation Calculator</h2>
+
+  <input id="amount" placeholder="Enter amount today (₹)">
+  <input id="rate" placeholder="Inflation rate (%)">
+  <input id="years" placeholder="Time (years)">
+
+  <button onclick="calculate()">Calculate Inflation</button>
+
+  <div id="result" class="result"></div>
+  <canvas id="chart"></canvas>
+  <div id="explain" class="explain"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let chart;
+
+function calculate() {
+  const P = Number(document.getElementById("amount").value);
+  const r = Number(document.getElementById("rate").value);
+  const t = Number(document.getElementById("years").value);
+
+  if (!P || !r || !t) {
+    alert("Please enter all values");
+    return;
+  }
+
+  const futureValue = P * Math.pow(1 + r / 100, t);
+  const loss = futureValue - P;
+
+  document.getElementById("result").innerHTML = `
+    Value after ${t} years = ₹${futureValue.toFixed(2)} <br>
+    Money lost due to inflation = ₹${loss.toFixed(2)}
+  `;
+
+  document.getElementById("explain").innerHTML = `
+    <b>Step-by-Step Explanation 👶</b><br><br>
+
+    1️⃣ Your money today = ₹${P}<br>
+    2️⃣ Inflation rate = ${r}% per year<br>
+    3️⃣ Time = ${t} years<br><br>
+
+    4️⃣ Every year money value reduces by ${r}%<br>
+    5️⃣ Formula used:<br>
+    P × (1 + r/100)<sup>t</sup><br><br>
+
+    6️⃣ Final value = ₹${futureValue.toFixed(2)}<br>
+    7️⃣ Loss because of inflation = ₹${loss.toFixed(2)}<br><br>
+
+    📌 Meaning: Your money looks bigger, but its <b>buying power is less</b>.
+  `;
+
+  drawChart(P, loss);
+}
+
+function drawChart(amount, loss) {
+  const ctx = document.getElementById("chart");
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: ["Original Value", "Inflation Loss"],
+      datasets: [{
+        data: [amount, loss],
+        backgroundColor: ["#2f80ed", "#ff7675"]
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: "white" }
+        }
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>

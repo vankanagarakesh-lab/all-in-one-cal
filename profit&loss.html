@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profit & Loss Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f1115;
+  font-family: system-ui, Arial;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #15181e;
+  color: white;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+h2 {
+  text-align: center;
+  opacity: 0.85;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #1e222b;
+  color: white;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.result {
+  margin-top: 16px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.explain {
+  margin-top: 14px;
+  font-size: 14px;
+  background: #1e222b;
+  padding: 12px;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+canvas {
+  margin-top: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>💰 Profit & Loss Calculator</h2>
+
+  <input id="cp" placeholder="Enter Cost Price (₹)">
+  <input id="sp" placeholder="Enter Selling Price (₹)">
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div id="result" class="result"></div>
+  <canvas id="chart"></canvas>
+  <div id="explain" class="explain"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let chart;
+
+function calculate() {
+  const CP = Number(document.getElementById("cp").value);
+  const SP = Number(document.getElementById("sp").value);
+
+  if (!CP || !SP) {
+    alert("Please enter both prices");
+    return;
+  }
+
+  let resultText = "";
+  let explainText = "";
+  let chartData = [];
+
+  if (SP > CP) {
+    const profit = SP - CP;
+    const profitPercent = (profit / CP) * 100;
+
+    resultText = `
+      ✅ Profit = ₹${profit}<br>
+      Profit % = ${profitPercent.toFixed(2)}%
+    `;
+
+    explainText = `
+      <b>Step-by-Step Explanation 👶</b><br><br>
+      1️⃣ Cost Price (CP) = ₹${CP}<br>
+      2️⃣ Selling Price (SP) = ₹${SP}<br><br>
+      3️⃣ SP is greater than CP → <b>Profit</b><br>
+      4️⃣ Profit = SP − CP = ₹${profit}<br>
+      5️⃣ Profit % = (Profit ÷ CP) × 100<br>
+      6️⃣ Profit % = ${profitPercent.toFixed(2)}%
+    `;
+
+    chartData = [CP, profit];
+  } 
+  else if (CP > SP) {
+    const loss = CP - SP;
+    const lossPercent = (loss / CP) * 100;
+
+    resultText = `
+      ❌ Loss = ₹${loss}<br>
+      Loss % = ${lossPercent.toFixed(2)}%
+    `;
+
+    explainText = `
+      <b>Step-by-Step Explanation 👶</b><br><br>
+      1️⃣ Cost Price (CP) = ₹${CP}<br>
+      2️⃣ Selling Price (SP) = ₹${SP}<br><br>
+      3️⃣ CP is greater than SP → <b>Loss</b><br>
+      4️⃣ Loss = CP − SP = ₹${loss}<br>
+      5️⃣ Loss % = (Loss ÷ CP) × 100<br>
+      6️⃣ Loss % = ${lossPercent.toFixed(2)}%
+    `;
+
+    chartData = [SP, loss];
+  } 
+  else {
+    resultText = "⚖️ No Profit No Loss";
+    explainText = `
+      CP = SP = ₹${CP}<br>
+      So there is no profit and no loss.
+    `;
+    chartData = [CP];
+  }
+
+  document.getElementById("result").innerHTML = resultText;
+  document.getElementById("explain").innerHTML = explainText;
+
+  drawChart(chartData, CP, SP);
+}
+
+function drawChart(data, CP, SP) {
+  const ctx = document.getElementById("chart");
+  if (chart) chart.destroy();
+
+  let labels = SP > CP ? ["Cost Price", "Profit"] :
+               CP > SP ? ["Selling Price", "Loss"] :
+               ["Cost Price"];
+
+  let colors = SP > CP ? ["#2f80ed", "#27ae60"] :
+               CP > SP ? ["#2f80ed", "#ff7675"] :
+               ["#2f80ed"];
+
+  chart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: "white" }
+        }
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
