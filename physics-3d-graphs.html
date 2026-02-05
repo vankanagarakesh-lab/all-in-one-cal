@@ -1,246 +1,194 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Advanced Physics 3D Graphs</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<style>
-:root { --bg: #0f1115; --text: white; --input: #1e2227; }
-body.light-mode { --bg: #ffffff; --text: #1a1a1a; --input: #f0f0f0; }
-
-body{ margin:0; font-family:Arial; background: var(--bg); color: var(--text); text-align:center; transition: 0.3s; }
-select,input,button{ width:92%; max-width:360px; padding:10px; margin:6px; font-size:14px; background: var(--input); color: var(--text); border:1px solid #444; border-radius:4px; }
-#graph{ width:100%; height:500px; }
-.note{ font-size:12px; opacity:0.8; margin:5px;}
-.formula{ color:#7dd3fc; font-size:13px; font-weight:bold; margin-bottom:10px; height:20px;}
-.theme-btn { background: #3b82f6; color: white; cursor: pointer; font-weight: bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Master STEM 3D Mobile</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        :root { --bg: #0d1117; --card: rgba(22, 27, 34, 0.95); --text: #e6edf3; --accent: #58a6ff; --math: #fbbf24; }
+        body.light-mode { --bg: #f0f2f5; --card: rgba(255, 255, 255, 0.95); --text: #1f2937; --accent: #0969da; --math: #9a6700; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; touch-action: manipulation; }
+        #plot-area { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1; }
+        .mobile-panel {
+            position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.1); border-radius: 24px 24px 0 0; z-index: 10;
+            padding: 12px 20px 25px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+        }
+        .mobile-panel.collapsed { transform: translateY(calc(100% - 60px)); }
+        .handle { width: 45px; height: 5px; background: rgba(128,128,128,0.4); margin: 0 auto 12px; border-radius: 10px; cursor: pointer; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        button { padding: 10px; border-radius: 10px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-theme { background: #6e7681; } .btn-rot { background: #f59e0b; } .btn-anim { background: #da3633; }
+        .anim-active { background: #238636 !important; box-shadow: 0 0 10px #238636; }
+        select { width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); color: var(--text); border: 1px solid rgba(128,128,128,0.3); font-size: 15px; margin-bottom: 12px; }
+        .logic-view { font-family: monospace; font-size: 10px; color: var(--math); background: rgba(0,0,0,0.1); padding: 8px; border-radius: 6px; margin-bottom: 12px; display: block; border-left: 3px solid var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .controls-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .control-group { display: flex; flex-direction: column; align-items: center; }
+        .control-group label { font-size: 9px; font-weight: bold; margin-bottom: 4px; color: var(--accent); text-transform: uppercase; }
+        input[type="range"] { width: 100%; accent-color: var(--accent); }
+    </style>
 </head>
 <body>
 
-<h2>🔬 Physics – Complete 3D Visualization</h2>
+<div id="plot-area"></div>
 
-<button class="theme-btn" onclick="toggleTheme()">Toggle White/Black Background</button>
-<p class="note">Select a topic, adjust values, and click Draw.</p>
+<div class="mobile-panel" id="uiPanel">
+    <div class="handle" onclick="toggleCollapse()"></div>
+    
+    <div class="btn-grid">
+        <button class="btn-theme" onclick="toggleTheme()">🌓 Theme</button>
+        <button class="btn-rot" onclick="toggleRotate()">🔄 Rotate</button>
+        <button class="btn-anim" id="animBtn" onclick="toggleAnimation()">▶ Play</button>
+    </div>
 
-<select id="graphType" onchange="updateUI()">
-  <optgroup label="1. MECHANICS">
-    <option value="posTime">Position–Time–Space Surface (x,y,t)</option>
-    <option value="velField">Velocity Field Surface</option>
-    <option value="accelField">Acceleration Field Surface</option>
-    <option value="projSurf">Projectile Motion Surface</option>
-    <option value="trajectory">Trajectory in 3D Space</option>
-    <option value="potential">Potential Energy Surface</option>
-    <option value="kinetic">Kinetic Energy Distribution</option>
-    <option value="forceField">Force Field Surface</option>
-    <option value="gravField">Gravitational Field Surface</option>
-    <option value="equiGrav">Equipotential Surfaces (Gravity)</option>
-  </optgroup>
-  <optgroup label="2. WAVES & OSCILLATIONS">
-    <option value="travelWave">Travelling Wave Surface</option>
-    <option value="standingWave">Standing Wave Surface</option>
-    <option value="soundInt">3D Sound Wave Intensity</option>
-    <option value="ripple">Ripple Tank Wave Surface</option>
-    <option value="superposition">Superposition of Waves (3D)</option>
-  </optgroup>
-  <optgroup label="3. ELECTRICITY & MAGNETISM">
-    <option value="elecDist">Electric Field Distribution</option>
-    <option value="elecPot">Electric Potential Surface</option>
-    <option value="equiElec">Equipotential Surfaces (Electric)</option>
-    <option value="pointCharge">Field around Point Charge</option>
-    <option value="dipole">Field around Electric Dipole</option>
-    <option value="magDist">Magnetic Field Distribution</option>
-    <option value="magLines">Magnetic Field Lines Surface</option>
-    <option value="wireField">Field around Current-Carrying Wire</option>
-    <option value="solenoid">Field around Solenoid</option>
-    <option value="emWave">Electromagnetic Wave Surface</option>
-  </optgroup>
-  <optgroup label="4. THERMODYNAMICS">
-    <option value="pvt">PV–T Surface (Ideal Gas)</option>
-    <option value="isothermal">Isothermal Surface</option>
-    <option value="adiabatic">Adiabatic Surface</option>
-    <option value="entropy">Entropy Surface</option>
-    <option value="enthalpy">Enthalpy Surface</option>
-    <option value="intEnergy">Internal Energy Surface</option>
-  </optgroup>
-  <optgroup label="5. OPTICS">
-    <option value="lightInt">Light Intensity Distribution</option>
-    <option value="diffraction">Diffraction Pattern Surface</option>
-    <option value="interference">Interference Fringe Surface</option>
-    <option value="rayTrace">3D Ray Tracing Surface</option>
-    <option value="wavefront">Wavefront Surface</option>
-  </optgroup>
-  <optgroup label="6. MODERN PHYSICS / QUANTUM">
-    <option value="waveFunc">Wave Function Surface (ψ)</option>
-    <option value="probDensity">Probability Density Surface (ψ²)</option>
-    <option value="potWell">Potential Well Surface</option>
-    <option value="energyLevel">Energy Level Surfaces</option>
-    <option value="electronCloud">Electron Cloud Density</option>
-    <option value="bandStructure">Band Structure Surface</option>
-  </optgroup>
-  <optgroup label="7. FLUID MECHANICS">
-    <option value="fluidVel">Velocity Field in Fluids</option>
-    <option value="pressureDist">Pressure Distribution Surface</option>
-    <option value="streamline">Streamline Surface</option>
-    <option value="flowPot">Flow Potential Surface</option>
-    <option value="turbulence">Turbulence Intensity Surface</option>
-  </optgroup>
-</select>
+    <select id="masterType" onchange="updateUI(); draw();">
+        <optgroup label="1. MATHEMATICS (PLANES & CURVES)">
+            <option value="hPlane">Horizontal Plane (z=c)</option>
+            <option value="vPlane">Vertical Plane (x=c)</option>
+            <option value="incPlane">Inclined Plane (z=ax+by+c)</option>
+            <option value="genPlane">General Plane (Ax+By+Cz+D=0)</option>
+            <option value="circCyl">Circular Cylinder</option>
+            <option value="sphere">Sphere (Pulsing)</option>
+            <option value="torus">Torus (Donut)</option>
+            <option value="helix">Helix Curve</option>
+        </optgroup>
+        <optgroup label="2. PHYSICS: MECHANICS">
+            <option value="posTime">Position–Time–Space (x,y,t)</option>
+            <option value="velField">Velocity Field Surface</option>
+            <option value="accel">Acceleration Field Surface</option>
+            <option value="proj">Projectile Motion Surface</option>
+            <option value="potE">Potential Energy Surface</option>
+            <option value="kinE">Kinetic Energy Dist.</option>
+            <option value="grav">Gravitational Field (Warp)</option>
+            <option value="equiGrav">Equipotential (Gravity)</option>
+        </optgroup>
+        <optgroup label="3. PHYSICS: WAVES">
+            <option value="travel">Travelling Wave [A sin(kx-wt)]</option>
+            <option value="stand">Standing Wave Surface</option>
+            <option value="sound">Sound Wave Intensity</option>
+            <option value="ripple">Ripple Tank Wave</option>
+            <option value="super">Wave Superposition</option>
+        </optgroup>
+        <optgroup label="4. ELECTRICITY & MAGNETISM">
+            <option value="ePot">Electric Potential Surface</option>
+            <option value="equiE">Equipotential (Electric)</option>
+            <option value="dipole">Field around Electric Dipole</option>
+            <option value="wire">Current-Carrying Wire Field</option>
+            <option value="solenoid">Solenoid Magnetic Field</option>
+            <option value="emWave">Electromagnetic Wave (E/B)</option>
+        </optgroup>
+        <optgroup label="5. THERMODYNAMICS">
+            <option value="pvt">PV–T Surface (Ideal Gas)</option>
+            <option value="iso">Isothermal Surface</option>
+            <option value="adia">Adiabatic Surface</option>
+            <option value="entropy">Entropy Surface</option>
+        </optgroup>
+        <optgroup label="6. OPTICS & QUANTUM">
+            <option value="diff">Diffraction Pattern (Sinc)</option>
+            <option value="interf">Interference Fringe Surface</option>
+            <option value="wavef">Wavefront Surface</option>
+            <option value="psi">Wave Function Surface (ψ)</option>
+            <option value="psiSq">Probability Density (|ψ|²)</option>
+            <option value="well">Potential Well (Infinite)</option>
+            <option value="band">Band Structure Surface</option>
+        </optgroup>
+        <optgroup label="7. FLUIDS">
+            <option value="fPres">Pressure Distribution (Bernoulli)</option>
+            <option value="stream">Streamline Surface</option>
+            <option value="turb">Turbulence Intensity</option>
+        </optgroup>
+    </select>
 
-<div id="formula" class="formula"></div>
-<input id="p1"> <input id="p2"> <input id="p3">
-<button onclick="draw()">Draw Graph</button>
-<div id="graph"></div>
+    <div class="logic-view" id="formula">Logic: Loading...</div>
+
+    <div class="controls-row">
+        <div class="control-group"><label id="l1">Mag A</label><input type="range" id="v1" min="0.1" max="5" step="0.1" value="2" oninput="draw(true)"></div>
+        <div class="control-group"><label id="l2">Freq B</label><input type="range" id="v2" min="0.1" max="5" step="0.1" value="1" oninput="draw(true)"></div>
+        <div class="control-group"><label id="l3">Speed</label><input type="range" id="v3" min="0" max="2" step="0.1" value="0.5" oninput="draw(true)"></div>
+    </div>
+</div>
 
 <script>
-let isLightMode = false;
-function toggleTheme() {
-    isLightMode = !isLightMode;
-    document.body.classList.toggle('light-mode');
-    draw(); // Redraw to update graph colors
+let isLight = false, rot = null, anim = null, t = 0, angle = 0;
+
+function toggleCollapse() { document.getElementById('uiPanel').classList.toggle('collapsed'); }
+function toggleTheme() { isLight = !isLight; document.body.classList.toggle('light-mode'); draw(); }
+
+function toggleRotate() {
+    if(rot) { clearInterval(rot); rot = null; }
+    else { rot = setInterval(() => { angle += 0.02; Plotly.relayout('plot-area', { 'scene.camera.eye': { x: 1.8*Math.cos(angle), y: 1.8*Math.sin(angle), z: 1 } }); }, 30); }
 }
 
-function range(a,b,s){ let arr=[]; for(let i=a;i<=b;i+=s) arr.push(i); return arr; }
+function toggleAnimation() {
+    const btn = document.getElementById("animBtn");
+    if(anim) { clearInterval(anim); anim = null; btn.innerText = "▶ Play"; btn.classList.remove("anim-active"); }
+    else { btn.innerText = "■ Stop"; btn.classList.add("anim-active"); anim = setInterval(() => { t += 0.1; draw(true); }, 40); }
+}
 
-function updateUI(){
-    const g = graphType.value;
+function updateUI() {
+    const type = masterType.value;
     const f = document.getElementById("formula");
-    const configs = {
-        posTime: ["x = f(y,t)", "Speed Scale", "Time Factor", "unused"],
-        velField: ["V = grad(Φ)", "Mag", "Field Strength", "unused"],
-        accelField: ["a = dV/dt", "Constant", "unused", "unused"],
-        projSurf: ["z = f(x,y,t)", "Velocity", "Gravity", "Angle"],
-        trajectory: ["3D Path", "Velocity", "Angle", "unused"],
-        potential: ["U = k(x²+y²)", "k Constant", "Scale", "unused"],
-        kinetic: ["K = ½mv²", "Mass", "Velocity scale", "unused"],
-        forceField: ["F = -dU/dr", "Strength", "unused", "unused"],
-        gravField: ["V = -GM/r", "Mass", "Softening", "unused"],
-        equiGrav: ["V(r) = C", "Level", "unused", "unused"],
-        travelWave: ["z = A sin(kx - wt)", "Amplitude", "k (Wave#)", "w (Freq)"],
-        standingWave: ["z = A sin(kx)cos(ky)", "Amplitude", "k", "unused"],
-        soundInt: ["I = P/(4πr²)", "Power", "unused", "unused"],
-        ripple: ["z = A sin(r)/r", "Amplitude", "Freq", "unused"],
-        superposition: ["z = ΣA sin(kr)", "A1", "A2", "Spacing"],
-        elecDist: ["E-Field Dist", "Charge", "unused", "unused"],
-        elecPot: ["V = kq/r", "Charge", "Softening", "unused"],
-        equiElec: ["V=const", "Voltage", "unused", "unused"],
-        pointCharge: ["1/r² Field", "Charge", "unused", "unused"],
-        dipole: ["V1 - V2", "Charge", "Separation", "unused"],
-        magDist: ["B Field", "Current", "unused", "unused"],
-        magLines: ["B Vector Map", "Strength", "unused", "unused"],
-        wireField: ["B = μI/2πr", "Current", "unused", "unused"],
-        solenoid: ["B = μnI", "Turns", "Current", "unused"],
-        emWave: ["E & B Orthogonal", "Amplitude", "k", "unused"],
-        pvt: ["P = nRT/V", "nR", "Temp Offset", "unused"],
-        isothermal: ["P ∝ 1/V", "Temp", "unused", "unused"],
-        adiabatic: ["P ∝ V^-γ", "Constant", "Gamma (1.4)", "unused"],
-        entropy: ["S = k ln W", "Scale", "unused", "unused"],
-        enthalpy: ["H = U + PV", "U Scale", "unused", "unused"],
-        intEnergy: ["U(T,V)", "Degree of Freedom", "unused", "unused"],
-        lightInt: ["I = cos²θ", "Brightness", "unused", "unused"],
-        diffraction: ["Sinc²(x)", "A", "Slit Width", "unused"],
-        interference: ["4I₀cos²δ", "A", "Spacing", "unused"],
-        rayTrace: ["Reflection/Refraction", "Index", "unused", "unused"],
-        wavefront: ["r = ct", "Time", "unused", "unused"],
-        waveFunc: ["ψ(x,y)", "Mode n", "Mode m", "unused"],
-        probDensity: ["|ψ|²", "Mode n", "Mode m", "unused"],
-        potWell: ["Infinite Well", "Width", "unused", "unused"],
-        energyLevel: ["E = n²h²/8mL²", "n", "unused", "unused"],
-        electronCloud: ["Prob Dist", "Orbit Scale", "unused", "unused"],
-        bandStructure: ["E(k)", "a (lattice)", "b", "unused"],
-        fluidVel: ["V(x,y)", "Flow Rate", "unused", "unused"],
-        pressureDist: ["Bernoulli P", "P₀", "Density", "unused"],
-        streamline: ["ψ = const", "Flow", "unused", "unused"],
-        flowPot: ["Φ Field", "Source", "unused", "unused"],
-        turbulence: ["Random Dist", "Intensity", "Scale", "unused"]
+    const m = {
+        hPlane: "Z = A + sin(t)", circCyl: "x² + y² = r²", travel: "Z = A * sin(B*X - t)", 
+        pvt: "P = nRT / V", psiSq: "|ψ|² = |sin(AX)sin(BY)|²", grav: "Z = -A / (R + sin(t))"
     };
-    const cfg = configs[g];
-    f.innerHTML = "Formula: " + cfg[0];
-    p1.placeholder = cfg[1]; p2.placeholder = cfg[2]; p3.placeholder = cfg[3];
+    f.innerText = m[type] || "Z = PhysicalLaw(X, Y, t)";
 }
 
-function draw(){
-    const type = graphType.value;
-    const a = Number(p1.value)||1, b = Number(p2.value)||1, c = Number(p3.value)||1;
-    const x = range(-5,5,0.25), y = range(-5,5,0.25);
-    let z = [];
+function draw(isUpdate = false) {
+    const type = masterType.value;
+    const a = parseFloat(document.getElementById('v1').value);
+    const b = parseFloat(document.getElementById('v2').value);
+    const s = parseFloat(document.getElementById('v3').value);
+    const tv = t * s;
 
-    if(type==="trajectory"){
-        let t = range(0,5,0.1);
-        Plotly.newPlot("graph", [{x:t.map(i=>a*i), y:t.map(i=>b*i), z:t.map(i=>a*i - 0.5*9.8*i*i), type:"scatter3d", mode:"lines"}], layout()); return;
+    if(["torus","sphere","helix","circCyl"].includes(type)) {
+        let uRange = [], vRange = []; for(let i=0; i<=6.4; i+=0.4) { uRange.push(i); vRange.push(i); }
+        let X=[], Y=[], Z=[];
+        for(let u of uRange) {
+            let xr=[], yr=[], zr=[];
+            for(let v of vRange) {
+                if(type==="torus"){ xr.push((a+b*Math.cos(v))*Math.cos(u+tv)); yr.push((a+b*Math.cos(v))*Math.sin(u+tv)); zr.push(b*Math.sin(v)); }
+                else if(type==="sphere"){ let r=a*(1+0.1*Math.sin(tv)); xr.push(r*Math.sin(u)*Math.cos(v)); yr.push(r*Math.sin(u)*Math.sin(v)); zr.push(r*Math.cos(u)); }
+                else if(type==="circCyl"){ xr.push(a*Math.cos(u)); yr.push(a*Math.sin(u)); zr.push(v-3.2+Math.sin(tv)); }
+            }
+            X.push(xr); Y.push(yr); Z.push(zr);
+        }
+        if(type==="helix"){
+            let pts=[]; for(let i=0;i<12;i+=0.2) pts.push(i);
+            render(pts.map(p=>a*Math.cos(p+tv)), pts.map(p=>a*Math.sin(p+tv)), pts.map(p=>b*p), isUpdate, 'scatter3d');
+        } else render(X,Y,Z,isUpdate,'surface');
+        return;
     }
 
-    z = y.map(Y => x.map(X => {
-        let r = Math.sqrt(X*X + Y*Y) + 0.01;
-        switch(type){
-            case "posTime": return a*X + b*Y;
-            case "velField": return a*Math.exp(-r/b);
-            case "accelField": return a;
-            case "projSurf": return a*X - 0.5*b*(X*X/a);
-            case "potential": return a*(X*X + Y*Y);
-            case "kinetic": return 0.5*a*(X*X + Y*Y);
-            case "forceField": return -a*r;
-            case "gravField": return -a/(r+b);
-            case "equiGrav": return Math.floor(-a/r * 5);
-            case "travelWave": return a*Math.sin(b*X - c);
-            case "standingWave": return a*Math.sin(b*X)*Math.cos(b*Y);
-            case "soundInt": return a/(r*r);
-            case "ripple": return a*Math.sin(b*r)/r;
-            case "superposition": return a*Math.sin(X)+b*Math.sin(Y+c);
-            case "elecDist": return a/(r*r);
-            case "elecPot": return a/(r+b);
-            case "equiElec": return Math.round(a/r);
-            case "pointCharge": return a/(r*r);
-            case "dipole": return (a/Math.sqrt((X-b)**2+Y**2+0.1)) - (a/Math.sqrt((X+b)**2+Y**2+0.1));
-            case "magDist": return a/r;
-            case "magLines": return Math.sin(a*r);
-            case "wireField": return a/r;
-            case "solenoid": return a*b;
-            case "emWave": return a*Math.sin(b*X);
-            case "pvt": return (a*(Y+6))/(X+6);
-            case "isothermal": return a/(X+6);
-            case "adiabatic": return a/Math.pow(X+6, b);
-            case "entropy": return a*Math.log(r);
-            case "enthalpy": return a*X + b*Y;
-            case "intEnergy": return a*(Y+6);
-            case "lightInt": return a*Math.pow(Math.cos(r/5), 2);
-            case "diffraction": return a*Math.pow(Math.sin(b*X)/(b*X), 2);
-            case "interference": return a*Math.pow(Math.cos(b*X), 2);
-            case "rayTrace": return X > 0 ? X*a : X;
-            case "wavefront": return Math.sqrt(Math.abs(a*a - r*r));
-            case "waveFunc": return Math.sin(a*X)*Math.sin(b*Y);
-            case "probDensity": return Math.pow(Math.sin(a*X)*Math.sin(b*Y), 2);
-            case "potWell": return r < a ? 0 : 10;
-            case "energyLevel": return a*a;
-            case "electronCloud": return Math.exp(-r/a);
-            case "bandStructure": return Math.cos(a*X) + Math.cos(b*Y);
-            case "fluidVel": return a*Y;
-            case "pressureDist": return a - 0.5*b*r;
-            case "streamline": return a*X*Y;
-            case "flowPot": return a*Math.log(r);
-            case "turbulence": return a*Math.sin(X*b)+Math.random()*c;
-            default: return 0;
+    let x=[], y=[]; for(let i=-5; i<=5; i+=0.5) { x.push(i); y.push(i); }
+    let z = y.map(Y => x.map(X => {
+        let r = Math.sqrt(X*X + Y*Y) + 0.1;
+        switch(type) {
+            case "posTime": return a*X + b*Y + Math.sin(tv);
+            case "proj": return a*X - 0.5*b*(X*X/a) + Math.cos(tv);
+            case "grav": return -a/(r + 0.2*Math.sin(tv));
+            case "travel": return a*Math.sin(b*X - tv);
+            case "ripple": return a*Math.sin(b*r - tv)/r;
+            case "stand": return a*Math.sin(b*X)*Math.cos(b*Y + tv);
+            case "psiSq": return Math.pow(Math.sin(a*X)*Math.sin(b*Y), 2)*(1+0.5*Math.cos(tv));
+            case "pvt": return (a*(Y+6+Math.sin(tv)))/(X+6);
+            case "dipole": return (a/Math.sqrt((X-b)**2+Y**2+0.1)) - (a/Math.sqrt((X+b)**2+Y**2+0.1))*Math.cos(tv);
+            case "turb": return a*Math.sin(X*b + tv) + (Math.random()*0.2);
+            default: return a*Math.sin(r - tv);
         }
     }));
-
-    Plotly.newPlot("graph", [{x:x, y:y, z:z, type:"surface", colorscale: isLightMode ? 'Jet' : 'Portland'}], layout());
+    render(x,y,z,isUpdate,'surface');
 }
 
-function layout(){
-    const color = isLightMode ? "#ffffff" : "#0f1115";
-    const fontColor = isLightMode ? "#1a1a1a" : "white";
-    return { 
-        paper_bgcolor: color, plot_bgcolor: color, font:{color: fontColor},
-        margin:{l:0,r:0,t:0,b:0}, 
-        scene:{
-            xaxis:{title:"X", gridcolor: isLightMode ? "#ccc" : "#444"}, 
-            yaxis:{title:"Y", gridcolor: isLightMode ? "#ccc" : "#444"}, 
-            zaxis:{title:"Z", gridcolor: isLightMode ? "#ccc" : "#444"}
-        }
-    };
+function render(x,y,z,isUpdate,mode) {
+    const trace = { x:x, y:y, z:z, type:mode, colorscale:'Portland', showscale:false };
+    const layout = { paper_bgcolor:"rgba(0,0,0,0)", margin:{l:0,r:0,t:0,b:0}, scene:{xaxis:{visible:false}, yaxis:{visible:false}, zaxis:{visible:false}, camera:{eye:{x:1.5,y:1.5,z:1.2}}} };
+    if(isUpdate) Plotly.react("plot-area", [trace], layout); else Plotly.newPlot("plot-area", [trace], layout);
 }
-updateUI(); draw();
+window.onload = () => { updateUI(); draw(); };
 </script>
 </body>
 </html>

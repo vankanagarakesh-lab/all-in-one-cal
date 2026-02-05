@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Science 3D Suite - All 50+ Graphs</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        :root { --bg: #0b0f19; --card: #161b2b; --text: #f0f6fc; --accent: #238636; --math: #e3b341; }
+        body.light-mode { --bg: #ffffff; --card: #f6f8fa; --text: #1f2328; --accent: #2da44e; --math: #9a6700; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; }
+        .wrapper { max-width: 1200px; margin: auto; padding: 15px; text-align: center; }
+        .glass-ui { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+        .nav { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        button { padding: 10px 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-theme { background: #30363d; } .btn-rot { background: #d29922; } .btn-anim { background: #cf222e; } .btn-draw { background: var(--accent); width: 100%; max-width: 300px; margin-top: 10px; }
+        .active-anim { background: #238636 !important; box-shadow: 0 0 15px #238636; }
+        select, input { padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: var(--bg); color: var(--text); margin: 4px; width: 90%; max-width: 400px; }
+        .formula-log { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border-left: 4px solid var(--math); margin: 15px 0; font-family: 'Courier New', monospace; color: var(--math); font-size: 14px; text-align: left; }
+        #plot { width: 100%; height: 600px; border-radius: 8px; margin-top: 15px; }
+        .param-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .param-grid div { display: flex; flex-direction: column; font-size: 11px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="nav">
+        <button class="btn-theme" onclick="toggleTheme()">🌓 Light/Dark</button>
+        <button class="btn-rot" onclick="toggleRotate()">🔄 Auto-Rotate</button>
+        <button class="btn-anim" id="animBtn" onclick="toggleAnimation()">▶ Play Motion</button>
+    </div>
+
+    <div class="glass-ui">
+        <h2>🔬 Complete Science Visualization Suite</h2>
+        
+        <select id="masterSelect" onchange="updateUI()">
+            <optgroup label="🟢 1. ATOMIC STRUCTURE">
+                <option value="sOrb">s-Orbital (Spherical Pulse)</option>
+                <option value="pOrb">p-Orbitals (px, py, pz)</option>
+                <option value="dOrb">d-Orbitals (Clover Shape)</option>
+                <option value="fOrb">f-Orbitals (Complex Cubic)</option>
+                <option value="prob">Probability Density (|ψ|²)</option>
+                <option value="cloud">Electron Cloud Dist.</option>
+            </optgroup>
+            <optgroup label="🔵 2. MOLECULAR SHAPES (VSEPR)">
+                <option value="linear">Linear Shape</option>
+                <option value="triPlan">Trigonal Planar</option>
+                <option value="tetra">Tetrahedral Geometry</option>
+                <option value="triBipy">Trigonal Bipyramidal</option>
+                <option value="octa">Octahedral Geometry</option>
+                <option value="bent">Bent (V-Shape)</option>
+                <option value="pyramid">Pyramidal Shape</option>
+            </optgroup>
+            <optgroup label="🟣 3. MOLECULAR ORBITALS">
+                <option value="bond">Bonding Orbital (Overlap)</option>
+                <option value="anti">Antibonding (Node)</option>
+                <option value="sigma">Sigma Bond Density</option>
+                <option value="pi">Pi Bond Density</option>
+                <option value="sp3">Hybrid Orbital (sp³)</option>
+            </optgroup>
+            <optgroup label="🔴 4. ENERGY SURFACES (PES)">
+                <option value="pes">Reaction Energy Path</option>
+                <option value="act">Activation Energy Barrier</option>
+                <option value="trans">Transition State Surface</option>
+                <option value="coord">Reaction Coordinate</option>
+            </optgroup>
+            <optgroup label="🟠 5-6. THERMO & PHASES">
+                <option value="gibbs">Gibbs Free Energy Surface</option>
+                <option value="enthalpy">Enthalpy Surface</option>
+                <option value="entropy">Entropy Flow</option>
+                <option value="ptv">P–T–V (Ideal Gas Law)</option>
+                <option value="slg">Solid–Liquid–Gas Surface</option>
+                <option value="triple">Triple Point View</option>
+            </optgroup>
+            <optgroup label="🟡 7-9. KINETICS & ELECTRO">
+                <option value="arr">Arrhenius Surface</option>
+                <option value="ads">Adsorption (Langmuir)</option>
+                <option value="nernst">Electrode Potential</option>
+                <option value="cell">Cell Potential Dist.</option>
+            </optgroup>
+            <optgroup label="🔷 10. SOLID STATE & PHYSICS">
+                <option value="lattice">Crystal Lattice (3D Grid)</option>
+                <option value="unit">Unit Cell Structure</option>
+                <option value="band">Band Structure Surface</option>
+                <option value="em">EM Wave (Traveling)</option>
+                <option value="gravity">Gravity Well (Physics)</option>
+                <option value="dipole">Electric Dipole Field</option>
+            </optgroup>
+        </select>
+
+        <div class="formula-log" id="formulaBox">Loading formula...</div>
+
+        <div class="param-grid">
+            <div><input type="number" id="v1" value="2" step="0.1"><label id="l1">Size</label></div>
+            <div><input type="number" id="v2" value="1" step="0.1"><label id="l2">Width</label></div>
+            <div><input type="number" id="v3" value="0.5" step="0.1"><label id="l3">Speed</label></div>
+        </div>
+        <button class="btn-draw" onclick="draw()">🔄 Manual Update</button>
+    </div>
+
+    <div id="plot" class="glass-ui"></div>
+</div>
+
+<script>
+let isLight = false, rot = null, anim = null, t = 0, angle = 0;
+
+function toggleTheme() {
+    isLight = !isLight;
+    document.body.classList.toggle('light-mode');
+    draw();
+}
+
+function toggleRotate() {
+    if(rot) { clearInterval(rot); rot = null; }
+    else {
+        rot = setInterval(() => {
+            angle += 0.02;
+            Plotly.relayout('plot', { 'scene.camera.eye': { x: 1.8*Math.cos(angle), y: 1.8*Math.sin(angle), z: 1 } });
+        }, 40);
+    }
+}
+
+function toggleAnimation() {
+    const btn = document.getElementById("animBtn");
+    if(anim) { clearInterval(anim); anim = null; btn.innerText = "▶ Play Motion"; btn.classList.remove("active-anim"); }
+    else {
+        btn.innerText = "■ Stop Motion"; btn.classList.add("active-anim");
+        anim = setInterval(() => { t += 0.1; draw(true); }, 50);
+    }
+}
+
+function updateUI() {
+    const s = document.getElementById("masterSelect").value;
+    const f = document.getElementById("formulaBox");
+    const m = {
+        sOrb: ["ψ = Size * exp(-r/Width) * cos(t)", "Size", "Decay", "Pulse"],
+        pOrb: ["ψ = X * exp(-r) * sin(t)", "Height", "Width", "Wiggle"],
+        pes: ["E = exp(-X²/W) - X + sin(X-t)", "Barrier", "Width", "Flow"],
+        em: ["Z = Size * sin(X/Width - t)", "Amplitude", "Wavelength", "Wave Speed"],
+        lattice: ["Z = sin(X*S+t) * sin(Y*S+t)", "Grid Count", "unused", "Vibe Speed"]
+    };
+    const c = m[s] || ["Z = Logic(X, Y, t)", "Param A", "Param B", "Speed"];
+    f.innerHTML = "<strong>Formula Logic:</strong> " + c[0];
+    document.getElementById("l1").innerText = c[1];
+    document.getElementById("l2").innerText = c[2];
+    document.getElementById("l3").innerText = c[3];
+}
+
+function draw(isUpdate = false) {
+    const type = document.getElementById("masterSelect").value;
+    const a = parseFloat(document.getElementById("v1").value) || 2;
+    const b = parseFloat(document.getElementById("v2").value) || 1;
+    const s = parseFloat(document.getElementById("v3").value) || 0.5;
+    
+    let x = [], y = [];
+    for(let i=-5; i<=5; i+=0.4) { x.push(i); y.push(i); }
+
+    let z = y.map(Y => x.map(X => {
+        let r = Math.sqrt(X*X + Y*Y) + 0.1;
+        let timeVar = t * s;
+        switch(type) {
+            case "sOrb": return a * Math.exp(-r/b) * Math.cos(timeVar);
+            case "pOrb": return a * X * Math.exp(-r/2) * Math.sin(timeVar);
+            case "dOrb": return a * (X*Y) * Math.exp(-r/2) * Math.cos(timeVar);
+            case "fOrb": return a * (X*X*X - 3*X*Y*Y) * Math.exp(-r/3) * Math.sin(timeVar);
+            case "prob": return Math.pow(a * Math.exp(-r/2), 2) * (1 + 0.2*Math.sin(timeVar));
+            case "cloud": return a * Math.exp(-r) * (1 + Math.random() * 0.1 * Math.sin(timeVar));
+            case "linear": return Math.abs(X) < 0.5 ? a * Math.cos(timeVar) : 0;
+            case "tetra": return a * Math.cos(X/b + timeVar) * Math.cos(Y/b + timeVar);
+            case "octa": return a * (Math.pow(Math.cos(X),2) + Math.pow(Math.cos(Y),2)) * Math.cos(timeVar);
+            case "triBipy": return a * (Math.sin(X+timeVar) + Math.sin(Y+timeVar) + Math.cos(r));
+            case "bond": return (Math.exp(-Math.abs(X-(1+0.2*Math.sin(timeVar)))) + Math.exp(-Math.abs(X+(1+0.2*Math.sin(timeVar))))) * a;
+            case "anti": return (Math.exp(-Math.abs(X-1)) - Math.exp(-Math.abs(X+1))) * a * Math.sin(timeVar);
+            case "sigma": return a * Math.exp(-(X*X+Y*Y)/b) * (1 + 0.2*Math.sin(timeVar));
+            case "pi": return a * Y * Math.exp(-r*r) * Math.sin(timeVar);
+            case "pes": return a * Math.exp(-(X*X)/b) - (0.5 * X) + (0.2 * Math.sin(X - timeVar));
+            case "gibbs": return (a - b * X * Y) + 0.5 * Math.sin(timeVar);
+            case "ptv": return (a * (2 + Math.sin(timeVar))) / (Math.abs(X) + 1);
+            case "slg": return a * X + b * Y + Math.sin(r - timeVar);
+            case "arr": return a * Math.exp(-b / (Math.abs(X) + 2 + Math.sin(timeVar)));
+            case "ads": return (a * b * X) / (1 + b * X) + 0.1*Math.sin(timeVar);
+            case "nernst": return a + 0.059 * Math.log10(Math.abs(X) + 0.1) * Math.sin(timeVar);
+            case "lattice": return Math.sin(a*X + timeVar) * Math.sin(a*Y + timeVar);
+            case "band": return Math.cos(a*X + timeVar) + Math.cos(b*Y + timeVar);
+            case "em": return a * Math.sin(X/b - timeVar);
+            case "gravity": return -a / (r + 0.2*Math.sin(timeVar));
+            case "dipole": return (a/Math.sqrt((X-1)**2+Y**2+0.1)) - (a/Math.sqrt((X+1)**2+Y**2+0.1));
+            default: return a * Math.sin(r - timeVar);
+        }
+    }));
+
+    const data = [{ x:x, y:y, z:z, type:'surface', colorscale: isLight ? 'Viridis' : 'Electric', showscale: false }];
+    const layout = {
+        paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)",
+        margin:{l:0,r:0,t:0,b:0}, font:{color: isLight ? "#1f2328" : "#f0f6fc"},
+        scene: { xaxis:{gridcolor:"#444", range:[-5,5]}, yaxis:{gridcolor:"#444", range:[-5,5]}, zaxis:{gridcolor:"#444", range:[-4,4]} }
+    };
+
+    if(isUpdate) Plotly.react("plot", data, layout);
+    else Plotly.newPlot("plot", data, layout);
+}
+
+window.onload = () => { updateUI(); draw(); };
+</script>
+</body>
+</html>
