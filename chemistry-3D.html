@@ -34,7 +34,7 @@
         <h2>🔬 Complete Science Visualization Suite</h2>
         
         <select id="masterSelect" onchange="updateUI()">
-            <optgroup label="🟢 1. ATOMIC STRUCTURE">
+            <optgroup label="1. ATOMIC STRUCTURE">
                 <option value="sOrb">s-Orbital (Spherical Pulse)</option>
                 <option value="pOrb">p-Orbitals (px, py, pz)</option>
                 <option value="dOrb">d-Orbitals (Clover Shape)</option>
@@ -42,7 +42,7 @@
                 <option value="prob">Probability Density (|ψ|²)</option>
                 <option value="cloud">Electron Cloud Dist.</option>
             </optgroup>
-            <optgroup label="🔵 2. MOLECULAR SHAPES (VSEPR)">
+            <optgroup label="2. MOLECULAR SHAPES (VSEPR)">
                 <option value="linear">Linear Shape</option>
                 <option value="triPlan">Trigonal Planar</option>
                 <option value="tetra">Tetrahedral Geometry</option>
@@ -51,20 +51,20 @@
                 <option value="bent">Bent (V-Shape)</option>
                 <option value="pyramid">Pyramidal Shape</option>
             </optgroup>
-            <optgroup label="🟣 3. MOLECULAR ORBITALS">
+            <optgroup label="3. MOLECULAR ORBITALS">
                 <option value="bond">Bonding Orbital (Overlap)</option>
                 <option value="anti">Antibonding (Node)</option>
                 <option value="sigma">Sigma Bond Density</option>
                 <option value="pi">Pi Bond Density</option>
                 <option value="sp3">Hybrid Orbital (sp³)</option>
             </optgroup>
-            <optgroup label="🔴 4. ENERGY SURFACES (PES)">
+            <optgroup label="4. ENERGY SURFACES (PES)">
                 <option value="pes">Reaction Energy Path</option>
                 <option value="act">Activation Energy Barrier</option>
                 <option value="trans">Transition State Surface</option>
                 <option value="coord">Reaction Coordinate</option>
             </optgroup>
-            <optgroup label="🟠 5-6. THERMO & PHASES">
+            <optgroup label="5-6. THERMO & PHASES">
                 <option value="gibbs">Gibbs Free Energy Surface</option>
                 <option value="enthalpy">Enthalpy Surface</option>
                 <option value="entropy">Entropy Flow</option>
@@ -72,13 +72,13 @@
                 <option value="slg">Solid–Liquid–Gas Surface</option>
                 <option value="triple">Triple Point View</option>
             </optgroup>
-            <optgroup label="🟡 7-9. KINETICS & ELECTRO">
+            <optgroup label="7-9. KINETICS & ELECTRO">
                 <option value="arr">Arrhenius Surface</option>
                 <option value="ads">Adsorption (Langmuir)</option>
                 <option value="nernst">Electrode Potential</option>
                 <option value="cell">Cell Potential Dist.</option>
             </optgroup>
-            <optgroup label="🔷 10. SOLID STATE & PHYSICS">
+            <optgroup label="10. SOLID STATE & PHYSICS">
                 <option value="lattice">Crystal Lattice (3D Grid)</option>
                 <option value="unit">Unit Cell Structure</option>
                 <option value="band">Band Structure Surface</option>
@@ -193,6 +193,7 @@ function draw(isUpdate = false) {
     const layout = {
         paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)",
         margin:{l:0,r:0,t:0,b:0}, font:{color: isLight ? "#1f2328" : "#f0f6fc"},
+        uirevision: 'true', // THIS ENABLES PERSISTENT ZOOM/ROTATE DURING ANIMATION
         scene: { xaxis:{gridcolor:"#444", range:[-5,5]}, yaxis:{gridcolor:"#444", range:[-5,5]}, zaxis:{gridcolor:"#444", range:[-4,4]} }
     };
 
