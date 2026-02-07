@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All-in-One Geometry Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root { --accent: #00e676; --bg: #0f1115; --card: #15181e; --input: #1e222b; }
+    body { margin:0; background: var(--bg); font-family: 'Segoe UI', system-ui; color: white; display: flex; justify-content: center; padding: 20px; }
+    .app { width: 100%; max-width: 550px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); }
+    h2 { text-align: center; color: var(--accent); margin-top: 0; font-weight: 800; letter-spacing: -1px; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    select, input { width: 100%; padding: 12px; background: var(--input); border: 1px solid #333; color: white; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
+    select { grid-column: span 2; border-color: var(--accent); }
+    button { grid-column: span 2; padding: 15px; background: var(--accent); border: none; color: #000; font-weight: bold; font-size: 16px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #00c853; transform: scale(1.02); }
+
+    #diagram-box { background: white; border-radius: 12px; margin: 20px 0; height: 250px; display: flex; justify-content: center; align-items: center; position: relative; }
+    .res-title { color: var(--accent); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .res-value { font-size: 24px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .steps { background: var(--input); padding: 15px; border-radius: 12px; font-size: 13.5px; line-height: 1.7; white-space: pre-line; border-left: 5px solid var(--accent); color: #ccc; }
+    .hidden { display: none; }
+    svg { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+
+<div class="app">
+    <h2>📐 Geometry Engine</h2>
+    
+    <div class="grid">
+        <select id="op" onchange="toggleInputs()">
+            <optgroup label="2D Plane Geometry">
+                <option value="rect">Rectangle (Area, Peri, Diag)</option>
+                <option value="circle">Circle (Area, Circ, Radius/Dia)</option>
+            </optgroup>
+            <optgroup label="3D Solid Geometry">
+                <option value="cube">Cube/Box (Volume, Surface Area)</option>
+                <option value="sphere">Sphere (Volume, Surface Area)</option>
+            </optgroup>
+            <optgroup label="Coordinate Geometry">
+                <option value="coord">Points (Dist, Midpoint, Slope)</option>
+            </optgroup>
+        </select>
+
+        <input id="v1" type="number" placeholder="Length / Radius / X1">
+        <input id="v2" type="number" placeholder="Width / Y1">
+        <input id="v3" type="number" class="hidden" placeholder="Height / X2">
+        <input id="v4" type="number" class="hidden" placeholder="Y2">
+        
+        <button onclick="run()">Calculate & Generate Diagram</button>
+    </div>
+
+    <div id="diagram-box"><svg id="gfx"></svg></div>
+
+    <div class="res-title">Results</div>
+    <div id="res" class="res-value">---</div>
+    
+    <div class="res-title">Step-by-Step Logic</div>
+    <div id="steps" class="steps">Select an operation and enter values...</div>
+</div>
+
+<script>
+const v1 = document.getElementById('v1'), v2 = document.getElementById('v2'), 
+      v3 = document.getElementById('v3'), v4 = document.getElementById('v4'),
+      gfx = document.getElementById('gfx');
+
+function toggleInputs() {
+    const mode = document.getElementById('op').value;
+    [v1, v2, v3, v4].forEach(i => i.classList.add('hidden'));
+    
+    if(mode === 'rect') { v1.classList.remove('hidden'); v2.classList.remove('hidden'); v1.placeholder="Length"; v2.placeholder="Width"; }
+    else if(mode === 'circle') { v1.classList.remove('hidden'); v1.placeholder="Radius (r)"; }
+    else if(mode === 'cube') { v1.classList.remove('hidden'); v2.classList.remove('hidden'); v3.classList.remove('hidden'); v1.placeholder="L"; v2.placeholder="W"; v3.placeholder="H"; }
+    else if(mode === 'sphere') { v1.classList.remove('hidden'); v1.placeholder="Radius (r)"; }
+    else if(mode === 'coord') { [v1, v2, v3, v4].forEach(i => i.classList.remove('hidden')); v1.placeholder="X1"; v2.placeholder="Y1"; v3.placeholder="X2"; v4.placeholder="Y2"; }
+}
+
+function run() {
+    const mode = document.getElementById('op').value;
+    const a = parseFloat(v1.value) || 0, b = parseFloat(v2.value) || 0, 
+          c = parseFloat(v3.value) || 0, d = parseFloat(v4.value) || 0;
+    gfx.innerHTML = '';
+    let out = "", stepStr = "";
+
+    if(mode === 'rect') {
+        let area = a * b, peri = 2*(a+b), diag = Math.sqrt(a**2 + b**2).toFixed(2);
+        out = `Area: ${area} | Peri: ${peri} | Diag: ${diag}`;
+        stepStr = `1. Area = L × W = ${a} × ${b} = ${area}\n2. Perimeter = 2(L + W) = 2(${a+b}) = ${peri}\n3. Diagonal = √(L² + W²) = √(${a**2}+${b**2}) = ${diag}`;
+        let s = Math.min(180/a, 120/b);
+        gfx.innerHTML = `<rect x="${150-(a*s/2)}" y="${125-(b*s/2)}" width="${a*s}" height="${b*s}" fill="#00e67622" stroke="#00e676" stroke-width="2"/>
+                         <text x="150" y="${120-(b*s/2)}" text-anchor="middle" font-size="12">L=${a}</text>
+                         <text x="${155+(a*s/2)}" y="130" font-size="12">W=${b}</text>`;
+    } 
+    else if(mode === 'circle') {
+        let area = (Math.PI * a**2).toFixed(2), circ = (2 * Math.PI * a).toFixed(2);
+        out = `Area: ${area} | Circ: ${circ} | Dia: ${a*2}`;
+        stepStr = `1. Radius = ${a}, Diameter = 2r = ${a*2}\n2. Circumference = 2πr = 2 × 3.14 × ${a} = ${circ}\n3. Area = πr² = 3.14 × ${a}² = ${area}`;
+        let rS = Math.min(a*10, 90);
+        gfx.innerHTML = `<circle cx="150" cy="125" r="${rS}" fill="#00e67622" stroke="#00e676" stroke-width="2"/>
+                         <line x1="150" y1="125" x2="${150+rS}" y2="125" stroke="red" stroke-dasharray="4"/>
+                         <text x="${150+rS/2}" y="120" font-size="12" fill="red">r=${a}</text>`;
+    }
+    else if(mode === 'cube') {
+        let vol = a * b * c, surf = 2*(a*b + b*c + a*c);
+        out = `Vol: ${vol} | Surface Area: ${surf}`;
+        stepStr = `1. Volume = L × W × H = ${a}×${b}×${c} = ${vol}\n2. Surface Area = 2(lw + wh + lh) = 2(${a*b}+${b*c}+${a*c}) = ${surf}`;
+        // Isometric box drawing
+        gfx.innerHTML = `<path d="M120 150 l50 -20 l0 -50 l-50 20 Z" fill="#eee" stroke="#333"/>
+                         <path d="M170 130 l30 -15 l0 -50 l-30 15 Z" fill="#ccc" stroke="#333"/>
+                         <path d="M120 100 l50 -20 l30 -15 l-50 20 Z" fill="#fff" stroke="#333"/>
+                         <text x="135" y="165" font-size="10">L:${a} W:${b} H:${c}</text>`;
+    }
+    else if(mode === 'coord') {
+        let dist = Math.sqrt((c-a)**2 + (d-b)**2).toFixed(2);
+        let mid = `(${(a+c)/2}, ${(b+d)/2})`;
+        let slope = (c-a) === 0 ? "∞" : ((d-b)/(c-a)).toFixed(2);
+        out = `Dist: ${dist} | Mid: ${mid} | Slope: ${slope}`;
+        stepStr = `1. Distance = √((x2-x1)² + (y2-y1)²) = √(${c-a}² + ${d-b}²) = ${dist}\n2. Midpoint = ((x1+x2)/2 , (y1+y2)/2) = ${mid}\n3. Slope (m) = Δy / Δx = ${d-b} / ${c-a} = ${slope}`;
+        gfx.innerHTML = `<line x1="60" y1="180" x2="240" y2="60" stroke="#00e676" stroke-width="3" />
+                         <circle cx="60" cy="180" r="4" fill="black"/><text x="40" y="200">(${a},${b})</text>
+                         <circle cx="240" cy="60" r="4" fill="black"/><text x="220" y="50">(${c},${d})</text>`;
+    }
+
+    document.getElementById('res').innerText = out;
+    document.getElementById('steps').innerText = stepStr;
+}
+
+toggleInputs(); // Initialize
+</script>
+</body>
+</html>

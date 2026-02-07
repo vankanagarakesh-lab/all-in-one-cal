@@ -29,8 +29,21 @@ body {
   display: flex;
   flex-direction: column;
   color: white;
-  position: relative;
+  position: relative; /* Needed for absolute positioning of the credit */
   overflow: hidden;
+}
+
+/* Credit Badge */
+.credit {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 10px;
+  color: #555;
+  pointer-events: none; /* User can click buttons under the text */
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  z-index: 5;
 }
 
 /* Top bar */
@@ -111,7 +124,7 @@ body {
 /* Buttons */
 .buttons {
   margin-top: auto;
-  padding: 10px;
+  padding: 10px 10px 25px 10px; /* Added bottom padding for credit space */
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
@@ -124,6 +137,7 @@ button {
   background: #1e222b;
   color: white;
   font-size: 20px;
+  cursor: pointer;
 }
 
 button:active {
@@ -140,20 +154,19 @@ button:active {
 
 <div class="calculator">
 
-  <!-- MENU (menu.html linked here) -->
+  <div class="credit">Created by V. Naga Rakesh</div>
+
   <div id="menu" class="menu-container">
     <iframe src="menu.html"></iframe>
   </div>
 
-  <!-- Top bar -->
   <div class="top-bar">
     <span class="menu-btn" onclick="toggleMenu()">☰</span>
     <div class="title">Calculator</div>
   </div>
 
-  <!-- Calculator UI -->
   <div class="display">
-    <input id="expression" class="expression" placeholder="0">
+    <input id="expression" class="expression" placeholder="0" readonly>
     <div id="result" class="result"></div>
   </div>
 
@@ -201,7 +214,7 @@ function toggleMenu() {
   menu.classList.toggle("open");
 }
 
-/* Calculator logic (unchanged) */
+/* Calculator logic */
 const exprInput = document.getElementById("expression");
 const resultEl = document.getElementById("result");
 
@@ -214,24 +227,22 @@ document.addEventListener("pointerdown", e => {
   if (v) insertAtCursor(v);
   if (act === "allclear") { exprInput.value = ""; resultEl.textContent = ""; }
   if (act === "clear") backspace();
-  if (act === "calc") exprInput.value = resultEl.textContent || exprInput.value;
+  if (act === "calc") { 
+    if(resultEl.textContent) {
+        exprInput.value = resultEl.textContent;
+        resultEl.textContent = "";
+    }
+  }
 
   liveCalculate();
 });
 
 function insertAtCursor(text) {
-  const s = exprInput.selectionStart;
-  const e = exprInput.selectionEnd;
-  exprInput.value = exprInput.value.slice(0, s) + text + exprInput.value.slice(e);
-  exprInput.selectionStart = exprInput.selectionEnd = s + text.length;
+  exprInput.value += text;
 }
 
 function backspace() {
-  const s = exprInput.selectionStart;
-  if (s > 0) {
-    exprInput.value = exprInput.value.slice(0, s - 1) + exprInput.value.slice(s);
-    exprInput.selectionStart = exprInput.selectionEnd = s - 1;
-  }
+  exprInput.value = exprInput.value.slice(0, -1);
 }
 
 function liveCalculate() {
@@ -242,7 +253,14 @@ function liveCalculate() {
       .replace(/tan/g, "Math.tan")
       .replace(/log/g, "Math.log10")
       .replace(/ln/g, "Math.log");
-    resultEl.textContent = eval(e);
+    
+    if(e === "") {
+        resultEl.textContent = "";
+        return;
+    }
+    
+    let res = eval(e);
+    resultEl.textContent = res;
   } catch {
     resultEl.textContent = "";
   }

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ultimate Triangle Master Station</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root { --primary: #ff5722; --blue: #2196f3; --bg: #0f1115; --card: #1c1f26; }
+    body { margin:0; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; padding: 20px; }
+    .app { width: 100%; max-width: 650px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+    h2 { text-align: center; color: var(--primary); margin: 0 0 20px 0; letter-spacing: -1px; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    select, input { width: 100%; padding: 12px; background: #2a2e38; border: 1px solid #444; color: white; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
+    select { grid-column: span 3; border-left: 5px solid var(--primary); font-weight: bold; cursor: pointer; }
+    button { grid-column: span 3; padding: 16px; background: var(--primary); border: none; color: white; font-weight: bold; font-size: 16px; border-radius: 12px; cursor: pointer; transition: 0.3s; margin-top: 5px; }
+    button:hover { filter: brightness(1.2); transform: scale(1.01); }
+
+    /* SVG Visual Box */
+    #diagram-box { background: #ffffff; border-radius: 15px; margin: 20px 0; height: 320px; border: 3px solid #333; position: relative; overflow: hidden; }
+    svg { width: 100%; height: 100%; }
+    
+    .res-title { color: var(--primary); font-size: 12px; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; }
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .res-card { background: #2a2e38; padding: 12px; border-radius: 10px; border-bottom: 2px solid var(--blue); }
+    .res-card span { display: block; font-size: 10px; color: #aaa; margin-bottom: 4px; }
+    .res-card b { font-size: 16px; color: #fff; }
+    
+    .steps { background: #15181e; padding: 15px; border-radius: 12px; font-size: 13px; line-height: 1.6; border-left: 4px solid var(--blue); color: #ccc; white-space: pre-line; }
+
+    /* SVG Styling */
+    .tri-poly { fill: rgba(33, 150, 243, 0.1); stroke: var(--blue); stroke-width: 3; stroke-linejoin: round; }
+    .arc { fill: none; stroke: var(--primary); stroke-width: 1.5; opacity: 0.6; }
+    .side-lbl { fill: #d32f2f; font-size: 14px; font-weight: bold; paint-order: stroke; stroke: #fff; stroke-width: 3px; }
+    .ang-lbl { fill: #1976d2; font-size: 12px; font-weight: bold; paint-order: stroke; stroke: #fff; stroke-width: 2px; }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="app">
+    <h2>📐 Master Triangle Suite</h2>
+    
+    <div class="grid">
+        <select id="mode" onchange="updateUI()">
+            <optgroup label="Standard Tools">
+                <option value="pyth">Pythagoras / Right Triangle (Side A, B)</option>
+                <option value="heron">Scalene / Heron's (Side A, B, C)</option>
+                <option value="equi">Equilateral Triangle (Side A)</option>
+                <option value="iso">Isosceles Triangle (Base, Side)</option>
+            </optgroup>
+            <optgroup label="Advanced Trigonometry">
+                <option value="cosine">Law of Cosines (Side A, B, Angle C)</option>
+                <option value="sine">Law of Sines (Side A, Angle A, Angle B)</option>
+                <option value="height">Triangle Height (Area, Base)</option>
+            </optgroup>
+        </select>
+
+        <input id="v1" type="number" placeholder="Side A" value="10">
+        <input id="v2" type="number" placeholder="Side B" value="10">
+        <input id="v3" type="number" placeholder="Side C / Angle" value="90">
+        
+        <button onclick="calculate()">Construct & Calculate</button>
+    </div>
+
+    <div id="diagram-box"><svg id="canvas"></svg></div>
+
+    <div class="res-title">Calculated Results</div>
+    <div class="res-grid">
+        <div class="res-card"><span>AREA</span><b id="r-area">-</b></div>
+        <div class="res-card"><span>PERIMETER</span><b id="r-peri">-</b></div>
+        <div class="res-card"><span>HEIGHT (h)</span><b id="r-ht">-</b></div>
+        <div class="res-card"><span>ANGLES (A, B, C)</span><b id="r-ang">-</b></div>
+    </div>
+
+    <div class="res-title">Step-by-Step Logic</div>
+    <div id="steps" class="steps">Select a mode and enter values.</div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+
+function updateUI() {
+    const m = document.getElementById('mode').value;
+    const v2 = document.getElementById('v2'), v3 = document.getElementById('v3');
+    v2.classList.remove('hidden'); v3.classList.remove('hidden');
+    
+    if(m === 'pyth' || m === 'height') v3.classList.add('hidden');
+    if(m === 'equi') { v2.classList.add('hidden'); v3.classList.add('hidden'); }
+    
+    if(m === 'pyth') { v1.placeholder="Base (a)"; v2.placeholder="Height (b)"; }
+    else if(m === 'cosine') { v1.placeholder="Side a"; v2.placeholder="Side b"; v3.placeholder="Angle C (°)"; }
+    else if(m === 'sine') { v1.placeholder="Side a"; v2.placeholder="Angle A (°)"; v3.placeholder="Angle B (°)"; }
+    else if(m === 'height') { v1.placeholder="Area"; v2.placeholder="Base"; }
+}
+
+function calculate() {
+    const m = document.getElementById('mode').value;
+    const val1 = parseFloat(document.getElementById('v1').value) || 0;
+    const val2 = parseFloat(document.getElementById('v2').value) || 0;
+    const val3 = parseFloat(document.getElementById('v3').value) || 0;
+
+    let sA, sB, sC, aA, aB, aC, area, peri, ht, logic = "";
+
+    try {
+        if (m === 'pyth') {
+            sA = val1; sB = val2; sC = Math.sqrt(sA*sA + sB*sB);
+            aC = 90; aA = Math.atan(sB/sA) * 180/Math.PI; aB = 90 - aA;
+            logic = `1. Pythagoras: c = √(${sA}² + ${sB}²) = ${sC.toFixed(2)}`;
+        } else if (m === 'equi') {
+            sA = sB = sC = val1; aA = aB = aC = 60;
+            logic = `1. All sides = ${val1}\n2. All angles = 60°`;
+        } else if (m === 'iso') {
+            sA = val1; sB = sC = val2;
+            aA = Math.acos((sB*sB + sC*sC - sA*sA)/(2*sB*sC)) * 180/Math.PI;
+            aB = aC = (180 - aA)/2;
+            logic = `1. Base: ${sA}, Sides: ${sB}\n2. Angles found via Law of Cosines.`;
+        } else if (m === 'heron') {
+            sA = val1; sB = val2; sC = val3;
+            aA = Math.acos((sB*sB + sC*sC - sA*sA)/(2*sB*sC)) * 180/Math.PI;
+            aB = Math.acos((sA*sA + sC*sC - sB*sB)/(2*sA*sC)) * 180/Math.PI;
+            aC = 180 - aA - aB;
+            logic = `1. Heron's Semi-P (s) = ${(sA+sB+sC)/2}\n2. Area = √(s(s-a)(s-b)(s-c))`;
+        } else if (m === 'cosine') {
+            sA = val1; sB = val2; aC = val3;
+            let rad = aC * Math.PI/180;
+            sC = Math.sqrt(sA*sA + sB*sB - 2*sA*sB*Math.cos(rad));
+            aA = Math.acos((sB*sB + sC*sC - sA*sA)/(2*sB*sC)) * 180/Math.PI;
+            aB = 180 - aA - aC;
+            logic = `1. c = √(a²+b²-2ab·cosC) = ${sC.toFixed(2)}`;
+        } else if (m === 'sine') {
+            sA = val1; aA = val2; aB = val3; aC = 180 - aA - aB;
+            sB = (sA * Math.sin(aB*Math.PI/180)) / Math.sin(aA*Math.PI/180);
+            sC = (sA * Math.sin(aC*Math.PI/180)) / Math.sin(aA*Math.PI/180);
+            logic = `1. Angle C = 180 - (${aA}+${aB}) = ${aC}°\n2. Law of Sines: b = (a·sinB)/sinA`;
+        } else if (m === 'height') {
+            area = val1; sA = val2; ht = (2 * area) / sA;
+            sB = ht; sC = Math.sqrt(ht*ht + sA*sA); aC = 90; aA = Math.atan(ht/sA)*180/Math.PI; aB = 90-aA;
+            logic = `1. height = (2·Area)/base = ${ht.toFixed(2)}`;
+        }
+
+        peri = sA + sB + sC;
+        let sP = peri/2;
+        area = area || Math.sqrt(sP * (sP-sA) * (sP-sB) * (sP-sC));
+        ht = ht || (2 * area / sA);
+
+        if(isNaN(area)) throw "Invalid Dimensions";
+
+        document.getElementById('r-area').innerText = area.toFixed(2);
+        document.getElementById('r-peri').innerText = peri.toFixed(2);
+        document.getElementById('r-ht').innerText = ht.toFixed(2);
+        document.getElementById('r-ang').innerText = `${aA.toFixed(0)}°, ${aB.toFixed(0)}°, ${aC.toFixed(0)}°`;
+        document.getElementById('steps').innerText = logic;
+
+        draw(sA, sB, sC, aA, aB, aC);
+    } catch(e) {
+        alert("Check your values! (Triangle inequality not met or invalid input)");
+    }
+}
+
+function draw(sa, sb, sc, aa, ab, ac) {
+    const p1 = [0, 0], p2 = [sa, 0];
+    const p3 = [sb * Math.cos(ac * Math.PI/180), sb * Math.sin(ac * Math.PI/180)];
+    const pts = [p1, p2, p3];
+
+    const minX = Math.min(...pts.map(p => p[0])), maxX = Math.max(...pts.map(p => p[0]));
+    const minY = Math.min(...pts.map(p => p[1])), maxY = Math.max(...pts.map(p => p[1]));
+    
+    const boxW = 400, boxH = 320, pad = 50;
+    const scale = Math.min((boxW - pad*2)/(maxX-minX||1), (boxH-pad*2)/(maxY-minY||1));
+    const offX = (boxW - (maxX-minX)*scale)/2 - minX*scale;
+    const offY = (boxH - (maxY-minY)*scale)/2 - minY*scale;
+
+    const s = pts.map(p => [p[0]*scale + offX, boxH - (p[1]*scale + offY)]);
+
+    let h = `<polygon points="${s[0][0]},${s[0][1]} ${s[1][0]},${s[1][1]} ${s[2][0]},${s[2][1]}" class="tri-poly" />`;
+    
+    // Labels
+    const mid = (a, b) => [(a[0]+b[0])/2, (a[1]+b[1])/2];
+    const m1 = mid(s[0], s[1]), m2 = mid(s[1], s[2]), m3 = mid(s[2], s[0]);
+    h += `<text x="${m1[0]}" y="${m1[1]+22}" class="side-lbl" text-anchor="middle">${sa.toFixed(1)}</text>`;
+    h += `<text x="${m2[0]+12}" y="${m2[1]}" class="side-lbl">${sc.toFixed(1)}</text>`;
+    h += `<text x="${m3[0]-12}" y="${m3[1]}" class="side-lbl" text-anchor="end">${sb.toFixed(1)}</text>`;
+    
+    h += `<text x="${s[0][0]+10}" y="${s[0][1]-10}" class="ang-lbl">${ac.toFixed(0)}°</text>`;
+    h += `<text x="${s[1][0]-35}" y="${s[1][1]-10}" class="ang-lbl">${ab.toFixed(0)}°</text>`;
+    h += `<text x="${s[2][0]}" y="${s[2][1]+25}" class="ang-lbl" text-anchor="middle">${aa.toFixed(0)}°</text>`;
+
+    canvas.innerHTML = h;
+}
+
+updateUI();
+calculate();
+</script>
+</body>
+</html>
